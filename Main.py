@@ -338,7 +338,7 @@ tNextFlip = [0.0]  # put in a list to make it mutable (weird quirk of python var
 
 # create clocks and window
 globalClock = core.Clock()  # to keep track of time
-win = visual.Window(screenRes, fullscr=False, allowGUI=False, monitor='testMonitor',
+win = visual.Window(screenRes, fullscr=False, monitor='testMonitor',
                     screen=params['screenToShow'], units='deg', name='win', color=params['screenColor'],
                     colorSpace='rgb255')
 win.setMouseVisible(False)
@@ -786,8 +786,7 @@ avgArray = []
 for block in range(0, params['nBlocks']):
     if block == 0:  # If it's the first block, runs a mood VAS rating task and displays some prompts to the participant.
         if params['skipInstructions'] == False:
-            image = visual.ImageStim(win, image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg", pos=(0, 0))
-            image.size *= 1.28
+            image = visual.ImageStim(win, image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg", pos=(0, 0), units='pix', size=screenRes)
             image.draw()
             win.flip()
             HelperFunctions.wait_for_space(win, io)
@@ -800,6 +799,7 @@ for block in range(0, params['nBlocks']):
             # Present each slide and wait for spacebar input to advance to the next slide
             for i in range(2, INSTRUCTIONS_SLIDES + 1):
                 image.image = f"{params['instructionsFolder']}{params['instructionsSuffix']}_{i}.jpeg"
+                image.size = screenRes
                 image.draw()
                 win.flip()
                 if i == 36:
