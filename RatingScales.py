@@ -61,7 +61,7 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
                 if event.key == "escape":
                     win.close()
                     core.quit()
-                elif event.key == [selectKey, 'space']:
+                elif event.key in [selectKey, ' ']:
                     accept = True
                     break
                 elif event.key in [upKey, downKey]:
