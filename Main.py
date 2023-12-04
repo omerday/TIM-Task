@@ -16,6 +16,7 @@ from psychopy import visual
 from psychopy.tools.filetools import fromFile, toFile  # saving and loading parameter files
 
 import BasicPromptTools  # for loading/presenting prompts and questions
+import HelperFunctions
 import RatingScales
 from HelperFunctions import reverse_string
 #from devices import Pathway
@@ -23,6 +24,8 @@ from time import time, sleep
 from Medoc_control_new import Pathway
 import serial
 import serial.tools.list_ports as list_ports
+from psychopy.iohub import launchHubServer
+
 
 # from psychopy import visual # visual causes a bug in the guis, so it's declared after all GUIs run.
 
@@ -151,6 +154,7 @@ def createPrintLogFile():
     df2 = pd.DataFrame(items, columns=['Time', 'Level', 'msg'])
     df2.to_csv('logPrints%s.csv' % expInfo['subject'])
 
+INSTRUCTIONS_SLIDES = 36
 
 # Declare primary task parameters.
 params = {
@@ -218,7 +222,8 @@ scriptName = 'TIM.py'
 try:  # try to get a previous parameters file
     expInfo = fromFile('%s-lastExpInfo.psydat' % scriptName)
     expInfo['session'] = 1  # automatically increment session number
-    expInfo['gender'] = ["female", "male"]
+    expInfo['Gender'] = ["female", "male"]
+    expInfo['Language'] = ["Hebrew", "English"]
     expInfo['T2'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
                      "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
     expInfo['T4'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
@@ -227,29 +232,31 @@ try:  # try to get a previous parameters file
                      "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
     expInfo['T8'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
                      "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
-    expInfo['painSupport'] = True
-    expInfo['skipInstructions'] = False
+    expInfo['Pain Support'] = True
+    expInfo['Skip Instructions'] = False
 
 except:  # if not there then use a default set
     expInfo = {
         'subject': '1',
         'session': 1,
-        'gender': 'female',
+        'Gender': 'female',
+        'Language': 'Hebrew',
         'T2': '36.0',
         'T4': '41.0',
         'T6': '46.0',
         'T8': '50.0',
-        'painSupport': True,
-        'skipInstructions': False,
+        'Pain Support': True,
+        'Skip Instructions': False,
     }
 
 # present a dialogue to change select params
-dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'T2', 'T4', 'T6', 'T8', 'painSupport'])
+dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'T2', 'T4', 'T6', 'T8', 'Pain Support'])
 if not dlg.OK:
     core.quit()  # the user hit cancel, so exit
 
-params['painSupport'] = expInfo['painSupport']
-params['skipInstructions'] = expInfo['skipInstructions']
+params['painSupport'] = expInfo['Pain Support']
+params['skipInstructions'] = expInfo['Skip Instructions']
+params['language'] = expInfo['Language']
 
 # save experimental info
 toFile('%s-lastExpInfo.psydat' % scriptName, expInfo)  # save params to file for next time
@@ -284,14 +291,13 @@ def write_to_csv(info_to_csv, name_csv_file):
     writer = csv.writer(name_csv_file)
     writer.writerow(info_to_csv)
 
-if expInfo['gender'] == 'female':
-    params['techInstructionImage1'] = 'imgs_female/instruct1_f.jpeg'
-    for i in range(2, 37):
-        params['image'+str(i-1)] = 'imgs_female/instruct' +str(i) +'_f.jpeg'
+params['instructionsFolder'] = './instructions/instructions'
+if params['language'] == 'english':
+    params['instructionsSuffix'] = '_E'
+elif expInfo['Gender'] == 'female':
+    params['instructionsSuffix'] = '_F'
 else:
-    params['techInstructionImage1'] = 'imgs_male/instruct1_m.jpeg'
-    for i in range(2, 37):
-        params['image'+str(i-1)] = 'imgs_male/instruct' +str(i) +'_m.jpeg'
+    params['instructionsSuffix'] = '_M'
 
 # ==================================== #
 # == SET UP PARALLEL PORT AND MEDOC == #
@@ -332,7 +338,7 @@ tNextFlip = [0.0]  # put in a list to make it mutable (weird quirk of python var
 
 # create clocks and window
 globalClock = core.Clock()  # to keep track of time
-win = visual.Window(screenRes, fullscr=False, allowGUI=False, monitor='testMonitor',
+win = visual.Window(screenRes, fullscr=False, monitor='testMonitor',
                     screen=params['screenToShow'], units='deg', name='win', color=params['screenColor'],
                     colorSpace='rgb255')
 win.setMouseVisible(False)
@@ -356,57 +362,6 @@ message2 = visual.TextStim(win, pos=[0, -.5], wrapWidth=1.5, color='#000000', al
 # load VAS Qs & options
 [questions, options, answers] = BasicPromptTools.ParseQuestionFile(params['questionFile'])
 print('%d questions loaded from %s' % (len(questions), params['questionFile']))
-
-# load technical instruction images
-techInstructionImage1 = visual.ImageStim(win, image=params['techInstructionImage1'], pos=(0, 0))
-# techInstructionImage2 = visual.ImageStim(win, image=params['techInstructionImage2'], pos=(0, 0))
-technicalInstructionsSlides = [techInstructionImage1]
-for techInstructionImage in technicalInstructionsSlides:
-    techInstructionImage.size *= 1.28
-
-# load Instructions images
-image1 = visual.ImageStim(win, image=params['image1'], pos=(0, 0))
-image2 = visual.ImageStim(win, image=params['image2'], pos=(0, 0))
-image3 = visual.ImageStim(win, image=params['image3'], pos=(0, 0))
-image4 = visual.ImageStim(win, image=params['image4'], pos=(0, 0))
-image5 = visual.ImageStim(win, image=params['image5'], pos=(0, 0))
-image6 = visual.ImageStim(win, image=params['image6'], pos=(0, 0))
-image7 = visual.ImageStim(win, image=params['image7'], pos=(0, 0))
-image8 = visual.ImageStim(win, image=params['image8'], pos=(0, 0))
-image9 = visual.ImageStim(win, image=params['image9'], pos=(0, 0))
-image10 = visual.ImageStim(win, image=params['image10'], pos=(0, 0))
-image11 = visual.ImageStim(win, image=params['image11'], pos=(0, 0))
-image12 = visual.ImageStim(win, image=params['image12'], pos=(0, 0))
-image13 = visual.ImageStim(win, image=params['image13'], pos=(0, 0))
-image14 = visual.ImageStim(win, image=params['image14'], pos=(0, 0))
-image15 = visual.ImageStim(win, image=params['image15'], pos=(0, 0))
-image16 = visual.ImageStim(win, image=params['image16'], pos=(0, 0))
-image17 = visual.ImageStim(win, image=params['image17'], pos=(0, 0))
-image18 = visual.ImageStim(win, image=params['image18'], pos=(0, 0))
-image19 = visual.ImageStim(win, image=params['image19'], pos=(0, 0))
-image20 = visual.ImageStim(win, image=params['image20'], pos=(0, 0))
-image21 = visual.ImageStim(win, image=params['image21'], pos=(0, 0))
-image22 = visual.ImageStim(win, image=params['image22'], pos=(0, 0))
-image23 = visual.ImageStim(win, image=params['image23'], pos=(0, 0))
-image24 = visual.ImageStim(win, image=params['image24'], pos=(0, 0))
-image25 = visual.ImageStim(win, image=params['image25'], pos=(0, 0))
-image26 = visual.ImageStim(win, image=params['image26'], pos=(0, 0))
-image27 = visual.ImageStim(win, image=params['image27'], pos=(0, 0))
-image28 = visual.ImageStim(win, image=params['image28'], pos=(0, 0))
-image29 = visual.ImageStim(win, image=params['image29'], pos=(0, 0))
-image30 = visual.ImageStim(win, image=params['image30'], pos=(0, 0))
-image31 = visual.ImageStim(win, image=params['image31'], pos=(0, 0))
-image32 = visual.ImageStim(win, image=params['image32'], pos=(0, 0))
-image33 = visual.ImageStim(win, image=params['image33'], pos=(0, 0))
-image34 = visual.ImageStim(win, image=params['image34'], pos=(0, 0))
-image35 = visual.ImageStim(win, image=params['image35'], pos=(0, 0))
-
-
-instructionsSlides = [image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12,image13, image14, image15, image16,
-                      image17, image18, image19, image20, image21, image22, image23, image24, image25, image26, image27, image28, image29, image30, image31,
-                      image32, image33, image34, image35]
-for image in instructionsSlides:
-    image.size *= 2.5
 
 # get stimulus files
 
@@ -817,7 +772,7 @@ def BehavFile(absTime, block, trial, color, trialTime, phase, phaseTime):
 # ===== MAIN EXPERIMENT ===== #
 # =========================== #
 
-
+io = launchHubServer()
 # log the start of the and set up
 logging.log(level=logging.EXP, msg='---START EXPERIMENT---')
 
@@ -830,22 +785,30 @@ avgArray = []
 # Starts a for loop that iterates over each block of the experiment.
 for block in range(0, params['nBlocks']):
     if block == 0:  # If it's the first block, runs a mood VAS rating task and displays some prompts to the participant.
-        if params['skipInstructions'] == False:
-            for slide in technicalInstructionsSlides:
-                slide.draw()
+        again = True
+        while again:
+            again = False
+            if params['skipInstructions'] == False:
+                image = visual.ImageStim(win, image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg", pos=(0, 0), units='pix', size=screenRes)
+                image.draw()
                 win.flip()
-                event.waitKeys(keyList=['space'])
-            WaitForFlipTime()
-            SetPortData(params['codeVAS'])
-            RunMoodVas(questions_vas1, options_vas1, name='PreVAS')
-            report_event('PreVAS', 'PreVas_rating')
-            # RunPrompts() We don't use "Run Prompts", but give instructions as text
-            # Present each slide and wait for spacebar input to advance to the next slide
-            for slide in instructionsSlides:
-                slide.draw()
-                win.flip()
-                event.waitKeys(keyList=['space'])
-            WaitForFlipTime()
+                HelperFunctions.wait_for_space(win, io)
+                WaitForFlipTime()
+                SetPortData(params['codeVAS'])
+                RunMoodVas(questions_vas1, options_vas1, name='PreVAS')
+                if params['painSupport']:
+                    report_event('PreVAS', 'PreVas_rating')
+                # RunPrompts() We don't use "Run Prompts", but give instructions as text
+                # Present each slide and wait for spacebar input to advance to the next slide
+                for i in range(2, INSTRUCTIONS_SLIDES + 1):
+                    image.image = f"{params['instructionsFolder']}{params['instructionsSuffix']}_{i}.jpeg"
+                    image.size = screenRes
+                    image.draw()
+                    win.flip()
+                    if i == 36:
+                        again = HelperFunctions.wait_for_space_with_replay(win, io)
+                    else:
+                        HelperFunctions.wait_for_space(win, io)
 
     if block == 2:  # If it's the second block, stops drawing the anxiety slider and fixation cross, runs a mood VAS rating task, displays some prompts, and sets the next stimulus presentation time to 4-6 seconds in the future.
         print("got to block 2 if statement")
