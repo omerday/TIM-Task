@@ -234,6 +234,7 @@ try:  # try to get a previous parameters file
                      "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
     expInfo['Pain Support'] = True
     expInfo['Skip Instructions'] = False
+    expInfo['Continue Shape'] = True
 
 except:  # if not there then use a default set
     expInfo = {
@@ -247,16 +248,18 @@ except:  # if not there then use a default set
         'T8': '50.0',
         'Pain Support': True,
         'Skip Instructions': False,
+        'Continuous Shape': True,
     }
 
 # present a dialogue to change select params
-dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'T2', 'T4', 'T6', 'T8', 'Pain Support'])
+dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'T2', 'T4', 'T6', 'T8', 'Pain Support', 'Continuous Shape'])
 if not dlg.OK:
     core.quit()  # the user hit cancel, so exit
 
 params['painSupport'] = expInfo['Pain Support']
 params['skipInstructions'] = expInfo['Skip Instructions']
 params['language'] = expInfo['Language']
+params['continuousShape'] = expInfo['Continuous Shape']
 
 # save experimental info
 toFile('%s-lastExpInfo.psydat' % scriptName, expInfo)  # save params to file for next time
@@ -498,7 +501,8 @@ def GrowingSquare(color, block, trial, params):
         # Set size of rating scale marker based on current square size
         sizeRatio = squareImages[i-1].size[0] / squareImages[0].size[0]
 
-        squareImages[i-1].draw()
+        curr_image = squareImages[i-1]
+        curr_image.draw()
         win.flip()
         print("color " + str(color) + 'i: '+str(i-1))
         # send event to biopac
@@ -506,7 +510,15 @@ def GrowingSquare(color, block, trial, params):
 
         # Wait for specified duration
         square_duration = random.randint(params['squareDurationMin'], params['squareDurationMax'])
-        core.wait(square_duration)
+
+        if params['continuousShape']:
+            core.wait(square_duration)
+        else:
+            core.wait(1)
+            curr_image.image = "Circles2/blank.png"
+            curr_image.draw()
+            win.flip()
+            core.wait(square_duration - 1)
 
         # get new keys
         newKeys = event.getKeys(keyList=['q', 'escape'], timeStamped=globalClock)
