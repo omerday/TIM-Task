@@ -61,26 +61,23 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
                 if event.key == "escape":
                     win.close()
                     core.quit()
-                elif event.key == selectKey:
+                elif event.key == [selectKey, 'space']:
                     accept = True
                     break
                 elif event.key in [upKey, downKey]:
-                    keyHold = True
+                    key_hold = True
                     tPress = time.time()
                     keyPressed = event.key
                     step = stepSize if keyPressed == upKey else -stepSize
-                    print(f"key {event.key} pressed, entering while")
-                    while keyHold:
-                        print(f"In while statement\n stepSize={stepSize}")
+                    while key_hold:
                         valPress = ratingScale.markerPlacedAt
                         ratingScale.markerPlacedAt = max(valPress + step, ratingScale.low)
                         ratingScale.markerPlacedAt = min(valPress + step, ratingScale.high)
                         ratingScale.draw()
                         win.flip()
                         for releaseEvent in keyboard.getKeys(etype=Keyboard.KEY_RELEASE):
-                            print(f"Detected {event.key} release")
                             if releaseEvent.key == keyPressed:
-                                keyHold = False
+                                key_hold = False
                         core.wait(0.05)
 
             ratingScale.draw()
