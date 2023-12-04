@@ -654,7 +654,7 @@ def RunVas(questions, options, pos=(0., -0.25), scaleTextPos=[0., 0.25], questio
     WaitForFlipTime()
 
     # Show questions and options
-    [rating, decisionTime, choiceHistory] = RatingScales.ShowVAS(questions, options, win, questionDur=questionDur, \
+    rating, decisionTime, choiceHistory, score = RatingScales.ShowVAS(questions, options, win, questionDur=questionDur, \
                                                                  upKey=params['questionUpKey'],
                                                                  downKey=params['questionDownKey'],
                                                                  selectKey=params['questionSelectKey'], \
@@ -676,7 +676,7 @@ def RunVas(questions, options, pos=(0., -0.25), scaleTextPos=[0., 0.25], questio
     else:
         AddToFlipTime(
             1)  # I changes that from: AddToFlipTime(questionDur * len(questions))  # add question duration * # of questions
-    return choiceHistory
+    return score
 
 
 def RunMoodVas(questions, options, name='MoodVas'):
@@ -701,9 +701,9 @@ def RunMoodVas(questions, options, name='MoodVas'):
         imgName = imgName.replace('?', '')
         imgName = imgName.replace('\n', '')
         if name == 'PainRatingScale':
-            RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name)
+            score = RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name)
         else:
-            RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
+            score = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
         
         # VAS_history = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
         # csv_writer.writerow([globalClock.getTime(), 'VASRatingScale ' + name + ': choiceHistory=' + str(VAS_history)])
@@ -716,6 +716,7 @@ def RunMoodVas(questions, options, name='MoodVas'):
     # show screen and update next flip time
     win.flip()
     AddToFlipTime(1)
+    return score
 
 
 def CoolDown():
@@ -894,7 +895,7 @@ for block in range(0, params['nBlocks']):
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
         painITI += 1
-        RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale')
+        rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale')
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         WaitForFlipTime()
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
