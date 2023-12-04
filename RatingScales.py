@@ -21,18 +21,6 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
     rating = [None]*nQuestions
     decisionTime = [None]*nQuestions
     choiceHistory = [[0]]*nQuestions
-    # # Set up pyglet key handler
-    # keyState=key.KeyStateHandler()
-    # win.winHandle.push_handlers(keyState)
-    # # Get attributes for key handler (put _ in front of numbers)
-    # if downKey[0].isdigit():
-    #     downKey_attr = '_%s'%downKey
-    # else:
-    #     downKey_attr = downKey
-    # if upKey[0].isdigit():
-    #     upKey_attr = '_%s'%upKey
-    # else:
-    #     upKey_attr = upKey
 
     win.color = (217, 217, 217) #'white' # Setting background color to white
     # Rating Scale Loop
@@ -93,39 +81,6 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
                                 keyHold = False
                         core.wait(0.05)
 
-            # # Look for keypresses
-            # if keyState[getattr(key,downKey_attr)]: #returns True if left key is pressed
-            #     tPress = time.time()
-            #     valPress = ratingScale.markerPlacedAt
-            #     keyPressed = downKey_attr
-            #     step = -stepSize
-            # elif keyState[getattr(key,upKey_attr)]: #returns True if the right key is pressed
-            #     tPress = time.time()
-            #     valPress = ratingScale.markerPlacedAt
-            #     keyPressed = upKey_attr
-            #     step = stepSize
-            # else:
-            #     keyPressed = None
-            #
-            # # Handle sliding for held keys
-            # while (keyPressed is not None) and ((time.time()-tStart)<questionDur):
-            #     # update time
-            #     durPress = time.time()-tPress
-            #     # update display
-            #     ratingScale.draw()
-            #     win.flip()
-            #     # check for key release
-            #     if keyState[getattr(key,keyPressed)]==False:
-            #         break
-            #     # Update marker
-            #     if durPress>repeatDelay:
-            #         ratingScale.markerPlacedAt = valPress + (durPress-repeatDelay)*step*60 # *60 for refresh rate
-            #         ratingScale.markerPlacedAt = max(ratingScale.markerPlacedAt,ratingScale.low)
-            #         ratingScale.markerPlacedAt = min(ratingScale.markerPlacedAt,ratingScale.high)
-            # # Check for response
-            # if isEndedByKeypress and not ratingScale.noResponse:
-            #     break
-            # Redraw
             ratingScale.draw()
             win.flip()
 
