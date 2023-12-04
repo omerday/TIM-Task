@@ -785,28 +785,30 @@ avgArray = []
 # Starts a for loop that iterates over each block of the experiment.
 for block in range(0, params['nBlocks']):
     if block == 0:  # If it's the first block, runs a mood VAS rating task and displays some prompts to the participant.
-        if params['skipInstructions'] == False:
-            image = visual.ImageStim(win, image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg", pos=(0, 0), units='pix', size=screenRes)
-            image.draw()
-            win.flip()
-            HelperFunctions.wait_for_space(win, io)
-            WaitForFlipTime()
-            SetPortData(params['codeVAS'])
-            RunMoodVas(questions_vas1, options_vas1, name='PreVAS')
-            if params['painSupport']:
-                report_event('PreVAS', 'PreVas_rating')
-            # RunPrompts() We don't use "Run Prompts", but give instructions as text
-            # Present each slide and wait for spacebar input to advance to the next slide
-            for i in range(2, INSTRUCTIONS_SLIDES + 1):
-                image.image = f"{params['instructionsFolder']}{params['instructionsSuffix']}_{i}.jpeg"
-                image.size = screenRes
+        again = True
+        while again:
+            again = False
+            if params['skipInstructions'] == False:
+                image = visual.ImageStim(win, image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg", pos=(0, 0), units='pix', size=screenRes)
                 image.draw()
                 win.flip()
-                if i == 36:
-                    pass
-                else:
-                    HelperFunctions.wait_for_space(win, io)
-            WaitForFlipTime()
+                HelperFunctions.wait_for_space(win, io)
+                WaitForFlipTime()
+                SetPortData(params['codeVAS'])
+                RunMoodVas(questions_vas1, options_vas1, name='PreVAS')
+                if params['painSupport']:
+                    report_event('PreVAS', 'PreVas_rating')
+                # RunPrompts() We don't use "Run Prompts", but give instructions as text
+                # Present each slide and wait for spacebar input to advance to the next slide
+                for i in range(2, INSTRUCTIONS_SLIDES + 1):
+                    image.image = f"{params['instructionsFolder']}{params['instructionsSuffix']}_{i}.jpeg"
+                    image.size = screenRes
+                    image.draw()
+                    win.flip()
+                    if i == 36:
+                        again = HelperFunctions.wait_for_space_with_replay(win, io)
+                    else:
+                        HelperFunctions.wait_for_space(win, io)
 
     if block == 2:  # If it's the second block, stops drawing the anxiety slider and fixation cross, runs a mood VAS rating task, displays some prompts, and sets the next stimulus presentation time to 4-6 seconds in the future.
         print("got to block 2 if statement")

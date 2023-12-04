@@ -19,3 +19,23 @@ def wait_for_space(window, io):
             if event.key == "escape":
                 window.close()
                 core.quit()
+
+
+def wait_for_space_with_replay(window, io):
+    """
+    Helper method to wait for a Spacebar keypress and keep the window open, or get 'r' keypress for replay of the
+     InstructionsEnglish. Returns True if needed to replay.
+    :param window:
+    :return: True/False if r was pressed
+    """
+    keyboard = io.devices.keyboard
+    while True:
+        keys = keyboard.getPresses()
+        for event in keys:
+            if event.key == 'r' or event.key == 'R':
+                return True
+            elif event.key == ' ':
+                return False
+            elif event.key == "escape":
+                window.close()
+                core.quit()
