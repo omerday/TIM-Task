@@ -7,7 +7,7 @@ from psychopy.iohub.client.keyboard import Keyboard
 from psychopy.visual import ratingscale
 
 def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=float('inf'), isEndedByKeypress=True,
-            upKey='right', downKey='left', selectKey='enter',textColor='black',pos=(0.,0.),stepSize=2,hideMouse=True,
+            upKey='right', downKey='left', selectKey='enter',textColor='black',pos=(0.,0.),stepSize=1,hideMouse=True,
             repeatDelay=0.5, scaleTextPos=[0.,0.45], labelYPos=-0.27648, markerSize=0.1, tickHeight=0.0, tickLabelWidth=0.0):
     # import packages
     from psychopy import visual # for ratingScale
@@ -39,7 +39,8 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
             marker=markerStim, markerColor=textColor, markerExpansion=1, singleClick=False, disappear=False,
             textSize=0.8, textColor=textColor, textFont='Arial Hebrew', showValue=False,
             showAccept=False, acceptKeys=selectKey, acceptPreText='key, click', acceptText='accept?', acceptSize=1.0,
-            leftKeys=downKey, rightKeys=upKey, respKeys=(), lineColor=textColor, skipKeys=['q','escape'],
+            leftKeys='3', rightKeys='2',  # Dummy keys to avoid double step
+            respKeys=(), lineColor=textColor, skipKeys=['q','escape'],
             mouseOnly=False, noMouse=hideMouse, size=2.0, stretch=1.0, pos=pos, minTime=0.4, maxTime=questionDur,
             flipVert=False, depth=0, name='%s%d'%(name,iQ), autoLog=True)
         # Fix text wrapWidth
@@ -54,6 +55,7 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
         win.logOnFlip(level=logging.EXP, msg='Display %s%d'%(name,iQ))
         tStart = time.time()
         accept = False
+
         while (time.time()-tStart)<questionDur and not accept:
             for event in keyboard.getKeys(etype=Keyboard.KEY_PRESS):
                 if event.key == "escape":
@@ -69,7 +71,7 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
                     step = stepSize if keyPressed == upKey else -stepSize
                     print(f"key {event.key} pressed, entering while")
                     while keyHold:
-                        print("In while statement")
+                        print(f"In while statement\n stepSize={stepSize}")
                         valPress = ratingScale.markerPlacedAt
                         ratingScale.markerPlacedAt = max(valPress + step, ratingScale.low)
                         ratingScale.markerPlacedAt = min(valPress + step, ratingScale.high)
