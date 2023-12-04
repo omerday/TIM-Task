@@ -806,7 +806,7 @@ for block in range(0, params['nBlocks']):
                     image.size = screenRes
                     image.draw()
                     win.flip()
-                    if i == 36:
+                    if i == INSTRUCTIONS_SLIDES:
                         again = HelperFunctions.wait_for_space_with_replay(win, io)
                     else:
                         HelperFunctions.wait_for_space(win, io)
