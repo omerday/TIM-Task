@@ -247,16 +247,18 @@ except:  # if not there then use a default set
         'T8': '50.0',
         'Pain Support': True,
         'Skip Instructions': False,
+        'Continuous Shape': True,
     }
 
 # present a dialogue to change select params
-dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'T2', 'T4', 'T6', 'T8', 'Pain Support'])
+dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'T2', 'T4', 'T6', 'T8', 'Pain Support', 'Continuous Shape'])
 if not dlg.OK:
     core.quit()  # the user hit cancel, so exit
 
 params['painSupport'] = expInfo['Pain Support']
 params['skipInstructions'] = expInfo['Skip Instructions']
 params['language'] = expInfo['Language']
+params['continuousShape'] = expInfo['Continuous Shape']
 
 # save experimental info
 toFile('%s-lastExpInfo.psydat' % scriptName, expInfo)  # save params to file for next time
@@ -498,7 +500,8 @@ def GrowingSquare(color, block, trial, params):
         # Set size of rating scale marker based on current square size
         sizeRatio = squareImages[i-1].size[0] / squareImages[0].size[0]
 
-        squareImages[i-1].draw()
+        curr_image = squareImages[i-1]
+        curr_image.draw()
         win.flip()
         print("color " + str(color) + 'i: '+str(i-1))
         # send event to biopac
@@ -506,7 +509,15 @@ def GrowingSquare(color, block, trial, params):
 
         # Wait for specified duration
         square_duration = random.randint(params['squareDurationMin'], params['squareDurationMax'])
-        core.wait(square_duration)
+
+        if params['continuousShape']:
+            core.wait(square_duration)
+        else:
+            core.wait(1)
+            curr_image.image = "Circles2/blank.png"
+            curr_image.draw()
+            win.flip()
+            core.wait(square_duration - 1)
 
         # get new keys
         newKeys = event.getKeys(keyList=['q', 'escape'], timeStamped=globalClock)
