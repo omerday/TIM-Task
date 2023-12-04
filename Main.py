@@ -173,7 +173,7 @@ params = {
     'questionFile': './AnxietyScale.txt',  # Name of text file containing Q&As
     'questionDownKey': 'left',  # move slider left
     'questionUpKey': 'right',  # move slider right
-    'questionDur': 5.0,
+    'questionDur': 6.0,
     'vasStepSize': 0.5,  # how far the slider moves with a keypress (increase to move faster)
     'textColor': 'gray',  # black in rgb255 space or gray in rgb space
     'PreVasMsg': reverse_string("כעת נבצע דירוגים"),  # Text shown BEFORE each VAS except the final one
