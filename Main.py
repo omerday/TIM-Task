@@ -16,6 +16,7 @@ from psychopy import visual
 from psychopy.tools.filetools import fromFile, toFile  # saving and loading parameter files
 
 import BasicPromptTools  # for loading/presenting prompts and questions
+import HelperFunctions
 import RatingScales
 from HelperFunctions import reverse_string
 #from devices import Pathway
@@ -23,6 +24,8 @@ from time import time, sleep
 from Medoc_control_new import Pathway
 import serial
 import serial.tools.list_ports as list_ports
+from psychopy.iohub import launchHubServer
+
 
 # from psychopy import visual # visual causes a bug in the guis, so it's declared after all GUIs run.
 
@@ -288,13 +291,13 @@ def write_to_csv(info_to_csv, name_csv_file):
     writer = csv.writer(name_csv_file)
     writer.writerow(info_to_csv)
 
-params['instructionsFolder'] = './instructions/instruct'
+params['instructionsFolder'] = './instructions/instructions'
 if params['language'] == 'english':
-    params['instructionsSuffix'] = '_e.jpeg'
+    params['instructionsSuffix'] = '_E'
 elif expInfo['Gender'] == 'female':
-    params['instructionsSuffix'] = '_f.jpeg'
+    params['instructionsSuffix'] = '_F'
 else:
-    params['instructionsSuffix'] = '_m.jpeg'
+    params['instructionsSuffix'] = '_M'
 
 # ==================================== #
 # == SET UP PARALLEL PORT AND MEDOC == #
@@ -769,7 +772,7 @@ def BehavFile(absTime, block, trial, color, trialTime, phase, phaseTime):
 # ===== MAIN EXPERIMENT ===== #
 # =========================== #
 
-
+io = launchHubServer()
 # log the start of the and set up
 logging.log(level=logging.EXP, msg='---START EXPERIMENT---')
 
@@ -783,11 +786,11 @@ avgArray = []
 for block in range(0, params['nBlocks']):
     if block == 0:  # If it's the first block, runs a mood VAS rating task and displays some prompts to the participant.
         if params['skipInstructions'] == False:
-            image = visual.ImageStim(win, image=f"{params['instructionsFolder']}1{params['instructionsSuffix']}", pos=(0, 0))
+            image = visual.ImageStim(win, image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg", pos=(0, 0))
             image.size *= 1.28
             image.draw()
             win.flip()
-            event.waitKeys(keyList=['space'])
+            HelperFunctions.wait_for_space(win, io)
             WaitForFlipTime()
             SetPortData(params['codeVAS'])
             RunMoodVas(questions_vas1, options_vas1, name='PreVAS')
@@ -796,10 +799,13 @@ for block in range(0, params['nBlocks']):
             # RunPrompts() We don't use "Run Prompts", but give instructions as text
             # Present each slide and wait for spacebar input to advance to the next slide
             for i in range(2, INSTRUCTIONS_SLIDES + 1):
-                image.image = f"{params['instructionsFolder']}{i}{params['instructionsSuffix']}"
+                image.image = f"{params['instructionsFolder']}{params['instructionsSuffix']}_{i}.jpeg"
                 image.draw()
                 win.flip()
-                event.waitKeys(keyList=['space'])
+                if i == 36:
+                    pass
+                else:
+                    HelperFunctions.wait_for_space(win, io)
             WaitForFlipTime()
 
     if block == 2:  # If it's the second block, stops drawing the anxiety slider and fixation cross, runs a mood VAS rating task, displays some prompts, and sets the next stimulus presentation time to 4-6 seconds in the future.
