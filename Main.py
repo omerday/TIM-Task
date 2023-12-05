@@ -554,6 +554,8 @@ def GrowingSquare(color, block, trial, params):
             core.wait(0.5)
             my_pathway.sendCommand('TRIGGER')
             print("Sent command trigger")
+            # send event to biopac
+            report_event(color_to_T_dict[color], color_to_T_dict[color] + '_heat_pulse')
         # make sure can update rating scale while delaying onset of heat pain
         timer = core.Clock()
         # add a randomized delay to the next event
@@ -581,8 +583,6 @@ def GrowingSquare(color, block, trial, params):
             print(f"Get status results - {my_pathway.sendCommand('GET_STATUS')}")
             # core.wait(0.5)
             # my_pathway.sendCommand('TRIGGER')
-            # send event to biopac
-            report_event(color_to_T_dict[color], color_to_T_dict[color] + '_heat_pulse')
         # give medoc time to give heat before signalling to stop
         timer = core.Clock()
         timer.add(1)
@@ -643,8 +643,6 @@ def SetPort(color, size, block, csv_writer):
             response = my_pathway.sendCommand('SELECT_TP', code.iat[0, 1])
             core.wait(1)
             my_pathway.sendCommand('START')
-            # send event to biopac
-            report_event(color_to_T_dict[color], color_to_T_dict[color] + '_heat_pulse')
 
             # Trigger the device to start the heat pulse
             # my_pathway.trigger()

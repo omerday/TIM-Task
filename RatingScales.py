@@ -4,6 +4,7 @@
 from psychopy import core, event, logging#, visual # visual and gui conflict, so don't import it here
 import time
 
+
 def ShowVAS(questions_list, options_list, win, name='Question', questionDur=float('inf'), isEndedByKeypress=True, 
             upKey='up', downKey='down', selectKey='enter',textColor='black',pos=(0.,0.),stepSize=1.,hideMouse=True,
             repeatDelay=0.5, scaleTextPos=[0.,0.45], labelYPos=-0.27648, markerSize=0.1, tickHeight=0.0, tickLabelWidth=0.0):
