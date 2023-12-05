@@ -10,6 +10,7 @@ import random  # for randomization of trials
 import time as ts
 import os
 
+import pandas
 import pandas as pd
 from psychopy import core, gui, event, logging
 from psychopy import visual
@@ -33,6 +34,9 @@ from psychopy.iohub import launchHubServer
 # ===== PARAMETERS ===== #
 # ====================== #
 # Save the parameters declared below?
+
+PAIN_RATING_CSV_HEADERS = ['Block', 'Trial', 'Color', 'Pain']
+
 
 """
 This function will take event's that happen on psychopy
@@ -654,7 +658,7 @@ def RunVas(questions, options, pos=(0., -0.25), scaleTextPos=[0., 0.25], questio
     WaitForFlipTime()
 
     # Show questions and options
-    [rating, decisionTime, choiceHistory] = RatingScales.ShowVAS(questions, options, win, questionDur=questionDur, \
+    rating, decisionTime, choiceHistory, score = RatingScales.ShowVAS(questions, options, win, questionDur=questionDur, \
                                                                  upKey=params['questionUpKey'],
                                                                  downKey=params['questionDownKey'],
                                                                  selectKey=params['questionSelectKey'], \
@@ -676,7 +680,7 @@ def RunVas(questions, options, pos=(0., -0.25), scaleTextPos=[0., 0.25], questio
     else:
         AddToFlipTime(
             1)  # I changes that from: AddToFlipTime(questionDur * len(questions))  # add question duration * # of questions
-    return choiceHistory
+    return score
 
 
 def RunMoodVas(questions, options, name='MoodVas'):
@@ -701,9 +705,9 @@ def RunMoodVas(questions, options, name='MoodVas'):
         imgName = imgName.replace('?', '')
         imgName = imgName.replace('\n', '')
         if name == 'PainRatingScale':
-            RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name)
+            score = RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name)
         else:
-            RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
+            score = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
         
         # VAS_history = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
         # csv_writer.writerow([globalClock.getTime(), 'VASRatingScale ' + name + ': choiceHistory=' + str(VAS_history)])
@@ -716,6 +720,7 @@ def RunMoodVas(questions, options, name='MoodVas'):
     # show screen and update next flip time
     win.flip()
     AddToFlipTime(1)
+    return score
 
 
 def CoolDown():
@@ -790,6 +795,11 @@ logging.log(level=logging.EXP, msg='---START EXPERIMENT---')
 
 # Creates an empty numpy array for the number of trials specified in the experiment parameters.
 tStimVec = np.zeros(params['nTrials'])
+
+pain_rating_df = pd.DataFrame(columns=PAIN_RATING_CSV_HEADERS)
+dict_for_df = {}
+for header in PAIN_RATING_CSV_HEADERS:
+    dict_for_df[header] = None
 
 # Creates an empty list for storing average ratings across trials
 avgArray = []
@@ -894,10 +904,17 @@ for block in range(0, params['nBlocks']):
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
         painITI += 1
-        RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale')
+        rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale')
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         WaitForFlipTime()
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
+
+        # Save new data to the DF:
+        dict_for_df['Trial'] = trial
+        dict_for_df['Color'] = color
+        dict_for_df['Block'] = block
+        dict_for_df['Pain'] = rating
+        pain_rating_df = pandas.concat([pain_rating_df, pandas.DataFrame.from_records([dict_for_df])])
 
     ### THE FIXATION "SAFE" AND "GET READY" WAS DELETED FROM HERE ###
 
@@ -927,5 +944,7 @@ WaitForFlipTime()  # This waits for the next screen refresh.
 logging.log(level=logging.EXP, msg='--- END EXPERIMENT ---')
 
 # clean-up & exit experiment
-
+if not os.path.exists("./data"):
+    os.mkdir("data")
+pain_rating_df.to_csv(f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings.csv")
 CoolDown()

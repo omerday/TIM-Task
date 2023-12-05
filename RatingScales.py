@@ -17,6 +17,7 @@ def ShowVAS(questions_list, options_list, win, name='Question', questionDur=floa
     rating = [None]*nQuestions
     decisionTime = [None]*nQuestions
     choiceHistory = [[0]]*nQuestions
+    score=0
     # Set up pyglet key handler
     keyState=key.KeyStateHandler()
     win.winHandle.push_handlers(keyState)
@@ -99,7 +100,8 @@ def ShowVAS(questions_list, options_list, win, name='Question', questionDur=floa
             win.flip()
 
         # Log outputs
-        rating[iQ] = ratingScale.getRating()
+        score = ratingScale.getRating()
+        rating[iQ] = score
         decisionTime[iQ] = ratingScale.getRT()
         choiceHistory[iQ] = ratingScale.getHistory()
 
@@ -110,4 +112,4 @@ def ShowVAS(questions_list, options_list, win, name='Question', questionDur=floa
             logging.log(level=logging.DATA,msg='RatingScale %s: history=%s'%(ratingScale.name,choiceHistory[iQ]))
 
     win.color = (217, 217, 217)
-    return rating,decisionTime,choiceHistory
+    return rating, decisionTime, choiceHistory, score
