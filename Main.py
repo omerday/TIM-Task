@@ -10,6 +10,7 @@ import random  # for randomization of trials
 import time as ts
 import os
 
+import pandas
 import pandas as pd
 from psychopy import core, gui, event, logging
 from psychopy import visual
@@ -33,6 +34,9 @@ from psychopy.iohub import launchHubServer
 # ===== PARAMETERS ===== #
 # ====================== #
 # Save the parameters declared below?
+
+PAIN_RATING_CSV_HEADERS = ['Block', 'Trial', 'Color', 'Pain']
+
 
 """
 This function will take event's that happen on psychopy
@@ -792,6 +796,11 @@ logging.log(level=logging.EXP, msg='---START EXPERIMENT---')
 # Creates an empty numpy array for the number of trials specified in the experiment parameters.
 tStimVec = np.zeros(params['nTrials'])
 
+pain_rating_df = pd.DataFrame(columns=PAIN_RATING_CSV_HEADERS)
+dict_for_df = {}
+for header in PAIN_RATING_CSV_HEADERS:
+    dict_for_df[header] = None
+
 # Creates an empty list for storing average ratings across trials
 avgArray = []
 
@@ -900,6 +909,13 @@ for block in range(0, params['nBlocks']):
         WaitForFlipTime()
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
 
+        # Save new data to the DF:
+        dict_for_df['Trial'] = trial
+        dict_for_df['Color'] = color
+        dict_for_df['Block'] = block
+        dict_for_df['Pain'] = rating
+        pain_rating_df = pandas.concat([pain_rating_df, pandas.DataFrame.from_records([dict_for_df])])
+
     ### THE FIXATION "SAFE" AND "GET READY" WAS DELETED FROM HERE ###
 
     ############################################
@@ -928,5 +944,7 @@ WaitForFlipTime()  # This waits for the next screen refresh.
 logging.log(level=logging.EXP, msg='--- END EXPERIMENT ---')
 
 # clean-up & exit experiment
-
+if not os.path.exists("./data"):
+    os.mkdir("data")
+pain_rating_df.to_csv(f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings.csv")
 CoolDown()
