@@ -238,7 +238,7 @@ try:  # try to get a previous parameters file
                      "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
     expInfo['Pain Support'] = True
     expInfo['Skip Instructions'] = False
-    expInfo['Continue Shape'] = True
+    expInfo['Continuous Shape'] = True
 
 except:  # if not there then use a default set
     expInfo = {
