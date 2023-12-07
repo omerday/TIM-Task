@@ -315,7 +315,7 @@ if params['painSupport']:
 
 if params['painSupport']:
     # ip and port number from medoc application
-    my_pathway = Pathway(ip='192.168.55.80', port_number=20121)
+    my_pathway = Pathway(ip='10.0.0.11', port_number=20121)
     print("mypathway create")
 
     # Check status of medoc connection
