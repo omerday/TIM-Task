@@ -256,7 +256,7 @@ except:  # if not there then use a default set
     }
 
 # present a dialogue to change select params
-dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'T2', 'T4', 'T6', 'T8', 'Pain Support', 'Continuous Shape'])
+dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'Gender', 'Language', 'T2', 'T4', 'T6', 'T8', 'Pain Support','Skip Instructions', 'Continuous Shape'])
 if not dlg.OK:
     core.quit()  # the user hit cancel, so exit
 
@@ -733,7 +733,7 @@ def CoolDown():
     df.to_csv('avgFile%s.csv' % expInfo['subject'])
 
     message1.setText(reverse_string("הגענו לסוף הניסוי. תודה על ההשתתפות!"))
-    if expInfo['gender'] == 'female':
+    if expInfo['Gender'] == 'female':
         message2.setText(reverse_string("לחצי על אסקייפ כדי לסיים"))
     else:    
         message2.setText(reverse_string("לחץ על אסקייפ כדי לסיים"))
