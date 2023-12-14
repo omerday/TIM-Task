@@ -10,6 +10,7 @@ import random  # for randomization of trials
 import time as ts
 import os
 
+import pandas
 import pandas as pd
 from psychopy import core, gui, event, logging
 from psychopy import visual
@@ -33,6 +34,9 @@ from psychopy.iohub import launchHubServer
 # ===== PARAMETERS ===== #
 # ====================== #
 # Save the parameters declared below?
+
+PAIN_RATING_CSV_HEADERS = ['Block', 'Trial', 'Color', 'Pain']
+
 
 """
 This function will take event's that happen on psychopy
@@ -234,6 +238,7 @@ try:  # try to get a previous parameters file
                      "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
     expInfo['Pain Support'] = True
     expInfo['Skip Instructions'] = False
+    expInfo['Continuous Shape'] = True
 
 except:  # if not there then use a default set
     expInfo = {
@@ -247,16 +252,18 @@ except:  # if not there then use a default set
         'T8': '50.0',
         'Pain Support': True,
         'Skip Instructions': False,
+        'Continuous Shape': True,
     }
 
 # present a dialogue to change select params
-dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'Gender', 'Language', 'T2', 'T4', 'T6', 'T8', 'Pain Support', 'Skip Instructions'])
+dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'Gender', 'Language', 'T2', 'T4', 'T6', 'T8', 'Pain Support','Skip Instructions', 'Continuous Shape'])
 if not dlg.OK:
     core.quit()  # the user hit cancel, so exit
 
 params['painSupport'] = expInfo['Pain Support']
 params['skipInstructions'] = expInfo['Skip Instructions']
 params['language'] = expInfo['Language']
+params['continuousShape'] = expInfo['Continuous Shape']
 
 # save experimental info
 toFile('%s-lastExpInfo.psydat' % scriptName, expInfo)  # save params to file for next time
@@ -498,7 +505,8 @@ def GrowingSquare(color, block, trial, params):
         # Set size of rating scale marker based on current square size
         sizeRatio = squareImages[i-1].size[0] / squareImages[0].size[0]
 
-        squareImages[i-1].draw()
+        curr_image = squareImages[i-1]
+        curr_image.draw()
         win.flip()
         print("color " + str(color) + 'i: '+str(i-1))
         # send event to biopac
@@ -506,7 +514,15 @@ def GrowingSquare(color, block, trial, params):
 
         # Wait for specified duration
         square_duration = random.randint(params['squareDurationMin'], params['squareDurationMax'])
-        core.wait(square_duration)
+
+        if params['continuousShape']:
+            core.wait(square_duration)
+        else:
+            core.wait(1)
+            curr_image.image = "Circles2/blank.png"
+            curr_image.draw()
+            win.flip()
+            core.wait(square_duration - 1)
 
         # get new keys
         newKeys = event.getKeys(keyList=['q', 'escape'], timeStamped=globalClock)
@@ -538,6 +554,8 @@ def GrowingSquare(color, block, trial, params):
             core.wait(0.5)
             my_pathway.sendCommand('TRIGGER')
             print("Sent command trigger")
+            # send event to biopac
+            report_event(color_to_T_dict[color], color_to_T_dict[color] + '_heat_pulse')
         # make sure can update rating scale while delaying onset of heat pain
         timer = core.Clock()
         # add a randomized delay to the next event
@@ -565,8 +583,6 @@ def GrowingSquare(color, block, trial, params):
             print(f"Get status results - {my_pathway.sendCommand('GET_STATUS')}")
             # core.wait(0.5)
             # my_pathway.sendCommand('TRIGGER')
-            # send event to biopac
-            report_event(color_to_T_dict[color], color_to_T_dict[color] + '_heat_pulse')
         # give medoc time to give heat before signalling to stop
         timer = core.Clock()
         timer.add(1)
@@ -627,8 +643,6 @@ def SetPort(color, size, block, csv_writer):
             response = my_pathway.sendCommand('SELECT_TP', code.iat[0, 1])
             core.wait(1)
             my_pathway.sendCommand('START')
-            # send event to biopac
-            report_event(color_to_T_dict[color], color_to_T_dict[color] + '_heat_pulse')
 
             # Trigger the device to start the heat pulse
             # my_pathway.trigger()
@@ -643,7 +657,7 @@ def RunVas(questions, options, io, pos=(0., -0.25), scaleTextPos=[0., 0.25], que
     WaitForFlipTime()
 
     # Show questions and options
-    [rating, decisionTime, choiceHistory] = RatingScales.ShowVAS(questions, options, win, questionDur=questionDur,
+    rating, decisionTime, choiceHistory, score = RatingScales.ShowVAS(questions, options, win, questionDur=questionDur, \
                                                                  upKey=params['questionUpKey'],
                                                                  downKey=params['questionDownKey'],
                                                                  selectKey=params['questionSelectKey'],
@@ -665,7 +679,7 @@ def RunVas(questions, options, io, pos=(0., -0.25), scaleTextPos=[0., 0.25], que
     else:
         AddToFlipTime(
             1)  # I changes that from: AddToFlipTime(questionDur * len(questions))  # add question duration * # of questions
-    return choiceHistory
+    return score
 
 
 def RunMoodVas(questions, options, io, name='MoodVas'):
@@ -690,9 +704,9 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
         imgName = imgName.replace('?', '')
         imgName = imgName.replace('\n', '')
         if name == 'PainRatingScale':
-            RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name, io=io)
+            score = RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name, io=io)
         else:
-            RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name, io=io)
+            score = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name, io=io)
         
         # VAS_history = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
         # csv_writer.writerow([globalClock.getTime(), 'VASRatingScale ' + name + ': choiceHistory=' + str(VAS_history)])
@@ -705,6 +719,7 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
     # show screen and update next flip time
     win.flip()
     AddToFlipTime(1)
+    return score
 
 
 def CoolDown():
@@ -719,7 +734,7 @@ def CoolDown():
     df.to_csv('avgFile%s.csv' % expInfo['subject'])
 
     message1.setText(reverse_string("הגענו לסוף הניסוי. תודה על ההשתתפות!"))
-    if expInfo['gender'] == 'female':
+    if expInfo['Gender'] == 'female':
         message2.setText(reverse_string("לחצי על אסקייפ כדי לסיים"))
     else:    
         message2.setText(reverse_string("לחץ על אסקייפ כדי לסיים"))
@@ -779,6 +794,11 @@ logging.log(level=logging.EXP, msg='---START EXPERIMENT---')
 
 # Creates an empty numpy array for the number of trials specified in the experiment parameters.
 tStimVec = np.zeros(params['nTrials'])
+
+pain_rating_df = pd.DataFrame(columns=PAIN_RATING_CSV_HEADERS)
+dict_for_df = {}
+for header in PAIN_RATING_CSV_HEADERS:
+    dict_for_df[header] = None
 
 # Creates an empty list for storing average ratings across trials
 avgArray = []
@@ -883,10 +903,17 @@ for block in range(0, params['nBlocks']):
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
         painITI += 1
-        RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
+        rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         WaitForFlipTime()
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
+
+        # Save new data to the DF:
+        dict_for_df['Trial'] = trial
+        dict_for_df['Color'] = color
+        dict_for_df['Block'] = block
+        dict_for_df['Pain'] = rating
+        pain_rating_df = pandas.concat([pain_rating_df, pandas.DataFrame.from_records([dict_for_df])])
 
     ### THE FIXATION "SAFE" AND "GET READY" WAS DELETED FROM HERE ###
 
@@ -916,5 +943,7 @@ WaitForFlipTime()  # This waits for the next screen refresh.
 logging.log(level=logging.EXP, msg='--- END EXPERIMENT ---')
 
 # clean-up & exit experiment
-
+if not os.path.exists("./data"):
+    os.mkdir("data")
+pain_rating_df.to_csv(f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings.csv")
 CoolDown()

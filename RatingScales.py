@@ -6,8 +6,8 @@ import time
 from psychopy.iohub.client.keyboard import Keyboard
 from psychopy.visual import ratingscale
 
-def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=float('inf'), isEndedByKeypress=True,
-            upKey='right', downKey='left', selectKey='enter',textColor='black',pos=(0.,0.),stepSize=1,hideMouse=True,
+def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=float('inf'), isEndedByKeypress=True, 
+            upKey='up', downKey='down', selectKey='enter',textColor='black',pos=(0.,0.),stepSize=1.,hideMouse=True,
             repeatDelay=0.5, scaleTextPos=[0.,0.45], labelYPos=-0.27648, markerSize=0.1, tickHeight=0.0, tickLabelWidth=0.0):
     # import packages
     from psychopy import visual # for ratingScale
@@ -84,7 +84,8 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
             win.flip()
 
         # Log outputs
-        rating[iQ] = ratingScale.getRating()
+        score = ratingScale.getRating()
+        rating[iQ] = score
         decisionTime[iQ] = ratingScale.getRT()
         choiceHistory[iQ] = ratingScale.getHistory()
 
@@ -95,4 +96,4 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
             logging.log(level=logging.DATA,msg='RatingScale %s: history=%s'%(ratingScale.name,choiceHistory[iQ]))
 
     win.color = (217, 217, 217)
-    return rating,decisionTime,choiceHistory
+    return rating, decisionTime, choiceHistory, score
