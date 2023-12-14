@@ -915,6 +915,10 @@ for block in range(0, params['nBlocks']):
         dict_for_df['Pain'] = rating
         pain_rating_df = pandas.concat([pain_rating_df, pandas.DataFrame.from_records([dict_for_df])])
 
+        if not os.path.exists("./data"):
+            os.mkdir("data")
+        pain_rating_df.to_csv(f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings.csv")
+
     ### THE FIXATION "SAFE" AND "GET READY" WAS DELETED FROM HERE ###
 
     ############################################

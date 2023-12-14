@@ -54,9 +54,12 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
         # Display until time runs out (or key is pressed, if specified)
         win.logOnFlip(level=logging.EXP, msg='Display %s%d'%(name,iQ))
         tStart = time.time()
+        end_time = time.time() + questionDur
         accept = False
 
-        while (time.time()-tStart)<questionDur and not accept:
+        print(f"Current time - {time.time()}, VAS should last until {time.time() + questionDur}")
+
+        while time.time() < end_time and not accept:
             for event in keyboard.getKeys(etype=Keyboard.KEY_PRESS):
                 if event.key == "escape":
                     win.close()
