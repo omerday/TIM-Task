@@ -160,7 +160,7 @@ def createPrintLogFile():
     df2 = pd.DataFrame(items, columns=['Time', 'Level', 'msg'])
     df2.to_csv('logPrints%s.csv' % expInfo['subject'])
 
-INSTRUCTIONS_SLIDES = 36
+INSTRUCTIONS_SLIDES = 32
 
 # Declare primary task parameters.
 params = {
