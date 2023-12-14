@@ -26,6 +26,8 @@ from Medoc_control_new import Pathway
 import serial
 import serial.tools.list_ports as list_ports
 from psychopy.iohub import launchHubServer
+from time import strftime, localtime
+
 
 
 # from psychopy import visual # visual causes a bug in the guis, so it's declared after all GUIs run.
@@ -163,6 +165,7 @@ INSTRUCTIONS_SLIDES = 36
 # Declare primary task parameters.
 params = {
     # Declare stimulus and response parameters
+    'startTime': ts.time(),
     'screenIdx': 0,
     'nTrials': 8,  # number of squares in each block
     'nBlocks': 5,  # number of blocks (aka runs) - need time to move electrode in between
@@ -917,7 +920,7 @@ for block in range(0, params['nBlocks']):
 
         if not os.path.exists("./data"):
             os.mkdir("data")
-        pain_rating_df.to_csv(f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings.csv")
+        pain_rating_df.to_csv(f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings - {strftime('%Y-%m-%d %H-%M', localtime(params['startTime']))}.csv")
 
     ### THE FIXATION "SAFE" AND "GET READY" WAS DELETED FROM HERE ###
 
