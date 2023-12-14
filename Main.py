@@ -175,9 +175,9 @@ params = {
     'promptFile': './HeatAnticipationPrompts.txt',  # Name of text file containing prompts
     # 'initialpromptFile': 'InitialSafePrompts.txt',  # explain "safe" and "get ready" before the practice - NOT USING THESE SCREENS RIGHT NOW
     'questionFile': './AnxietyScale.txt',  # Name of text file containing Q&As
-    'questionDownKey': '1',  # move slider left
-    'questionUpKey': '2',  # move slider right
-    'questionDur': 5.0,
+    'questionDownKey': 'left',  # move slider left
+    'questionUpKey': 'right',  # move slider right
+    'questionDur': 6.0,
     'vasStepSize': 0.5,  # how far the slider moves with a keypress (increase to move faster)
     'textColor': 'gray',  # black in rgb255 space or gray in rgb space
     'PreVasMsg': reverse_string("כעת נבצע דירוגים"),  # Text shown BEFORE each VAS except the final one
@@ -190,7 +190,7 @@ params = {
     # Name of text file containing pain Rating Scale presented after each trial
     'MoodRatingPainFile': 'Questions/MoodRatingPainFile.txt',
     # Name of text file containing mood Q&As presented after run
-    'questionSelectKey': '3',  # select answer for VAS
+    'questionSelectKey': 'up',  # select answer for VAS
     'questionSelectAdvances': True,  # will locking in an answer advance past an image rating?
     'vasTextColor': 'black',  # color of text in both VAS types (-1,-1,-1) = black
     'vasMarkerSize': 0.1,  # in norm units (2 = whole screen)
@@ -322,7 +322,7 @@ if params['painSupport']:
 
 if params['painSupport']:
     # ip and port number from medoc application
-    my_pathway = Pathway(ip='192.168.55.80', port_number=20121)
+    my_pathway = Pathway(ip='10.0.0.11', port_number=20121)
     print("mypathway create")
 
     # Check status of medoc connection
@@ -650,8 +650,9 @@ def SetPort(color, size, block, csv_writer):
 # Handle end of a session
 
 
-def RunVas(questions, options, pos=(0., -0.25), scaleTextPos=[0., 0.25], questionDur=params['questionDur'],
+def RunVas(questions, options, io, pos=(0., -0.25), scaleTextPos=[0., 0.25], questionDur=params['questionDur'],
            isEndedByKeypress=params['questionSelectAdvances'], name='Vas'):
+
     # wait until it's time
     WaitForFlipTime()
 
@@ -659,13 +660,13 @@ def RunVas(questions, options, pos=(0., -0.25), scaleTextPos=[0., 0.25], questio
     rating, decisionTime, choiceHistory, score = RatingScales.ShowVAS(questions, options, win, questionDur=questionDur, \
                                                                  upKey=params['questionUpKey'],
                                                                  downKey=params['questionDownKey'],
-                                                                 selectKey=params['questionSelectKey'], \
+                                                                 selectKey=params['questionSelectKey'],
                                                                  isEndedByKeypress=isEndedByKeypress,
-                                                                 textColor=params['vasTextColor'], name=name, pos=pos, \
+                                                                 textColor=params['vasTextColor'], name=name, pos=pos,
                                                                  scaleTextPos=scaleTextPos,
                                                                  labelYPos=pos[1] - params['vasLabelYDist'],
-                                                                 markerSize=params['vasMarkerSize'], \
-                                                                 tickHeight=1, tickLabelWidth=0.9)
+                                                                 markerSize=params['vasMarkerSize'],
+                                                                 tickHeight=1, tickLabelWidth=0.9, io=io)
 
     # write data to CSV file
     csv_writer.writerow([globalClock.getTime(), 'VASRatingScale ' + name + ': (key response) rating=' + str(rating),
@@ -681,7 +682,7 @@ def RunVas(questions, options, pos=(0., -0.25), scaleTextPos=[0., 0.25], questio
     return score
 
 
-def RunMoodVas(questions, options, name='MoodVas'):
+def RunMoodVas(questions, options, io, name='MoodVas'):
     # Wait until it's time
     WaitForFlipTime()
 
@@ -703,9 +704,9 @@ def RunMoodVas(questions, options, name='MoodVas'):
         imgName = imgName.replace('?', '')
         imgName = imgName.replace('\n', '')
         if name == 'PainRatingScale':
-            score = RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name)
+            score = RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name, io=io)
         else:
-            score = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
+            score = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name, io=io)
         
         # VAS_history = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
         # csv_writer.writerow([globalClock.getTime(), 'VASRatingScale ' + name + ': choiceHistory=' + str(VAS_history)])
@@ -815,7 +816,7 @@ for block in range(0, params['nBlocks']):
                 HelperFunctions.wait_for_space(win, io)
                 WaitForFlipTime()
                 SetPortData(params['codeVAS'])
-                RunMoodVas(questions_vas1, options_vas1, name='PreVAS')
+                RunMoodVas(questions_vas1, options_vas1, name='PreVAS', io=io)
                 if params['painSupport']:
                     report_event('PreVAS', 'PreVas_rating')
                 # RunPrompts() We don't use "Run Prompts", but give instructions as text
@@ -825,7 +826,7 @@ for block in range(0, params['nBlocks']):
                     image.size = screenRes
                     image.draw()
                     win.flip()
-                    if i == 36:
+                    if i == INSTRUCTIONS_SLIDES:
                         again = HelperFunctions.wait_for_space_with_replay(win, io)
                     else:
                         HelperFunctions.wait_for_space(win, io)
@@ -835,7 +836,7 @@ for block in range(0, params['nBlocks']):
         fixation.autoDraw = False
 
         # Run VAS after 2nd block
-        RunMoodVas(questions_vas2, options_vas2, name='MidRun')
+        RunMoodVas(questions_vas2, options_vas2, name='MidRun', io=io)
         report_event('MidRun', 'MidRun_rating')
 
         # Rest slide
@@ -902,7 +903,7 @@ for block in range(0, params['nBlocks']):
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
         painITI += 1
-        rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale')
+        rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         WaitForFlipTime()
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
@@ -933,7 +934,7 @@ for block in range(0, params['nBlocks']):
 
 WaitForFlipTime()  # This waits for the next screen refresh.
 
-RunMoodVas(questions_vas3, options_vas3, name='PostRun')  # This displays a mood VAS after the experiment is completed.
+RunMoodVas(questions_vas3, options_vas3, name='PostRun', io=io)  # This displays a mood VAS after the experiment is completed.
 report_event('PostRun', 'PostRun_rating')
 
 WaitForFlipTime()  # This waits for the next screen refresh.

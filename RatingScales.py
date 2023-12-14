@@ -3,9 +3,10 @@
 
 from psychopy import core, event, logging#, visual # visual and gui conflict, so don't import it here
 import time
+from psychopy.iohub.client.keyboard import Keyboard
+from psychopy.visual import ratingscale
 
-
-def ShowVAS(questions_list, options_list, win, name='Question', questionDur=float('inf'), isEndedByKeypress=True, 
+def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=float('inf'), isEndedByKeypress=True, 
             upKey='up', downKey='down', selectKey='enter',textColor='black',pos=(0.,0.),stepSize=1.,hideMouse=True,
             repeatDelay=0.5, scaleTextPos=[0.,0.45], labelYPos=-0.27648, markerSize=0.1, tickHeight=0.0, tickLabelWidth=0.0):
     # import packages
@@ -13,24 +14,13 @@ def ShowVAS(questions_list, options_list, win, name='Question', questionDur=floa
     import numpy as np # for tick locations
     from pyglet.window import key # for press-and-hold functionality
 
+    keyboard = io.devices.keyboard
+
     # set up
     nQuestions = len(questions_list)
     rating = [None]*nQuestions
     decisionTime = [None]*nQuestions
     choiceHistory = [[0]]*nQuestions
-    score=0
-    # Set up pyglet key handler
-    keyState=key.KeyStateHandler()
-    win.winHandle.push_handlers(keyState)
-    # Get attributes for key handler (put _ in front of numbers)
-    if downKey[0].isdigit():
-        downKey_attr = '_%s'%downKey
-    else:
-        downKey_attr = downKey
-    if upKey[0].isdigit():
-        upKey_attr = '_%s'%upKey
-    else:
-        upKey_attr = upKey
 
     win.color = (217, 217, 217) #'white' # Setting background color to white
     # Rating Scale Loop
@@ -42,15 +32,16 @@ def ShowVAS(questions_list, options_list, win, name='Question', questionDur=floa
         if tickLabelWidth==0.0: # if default value, determine automatically to fit all tick mark labels
             tickWrapWidth = (tickMarks[1]-tickMarks[0])*0.9/100 # *.9 for extra space, /100 for norm units
         else: # use user-specified value
-            tickWrapWidth = tickLabelWidth;
+            tickWrapWidth = tickLabelWidth
         
-        ratingScale = visual.RatingScale(win, scale=questions_list[iQ], \
-            low=0., high=100., markerStart=50., precision=1., labels=options_list[iQ], tickMarks=tickMarks, tickHeight=tickHeight, \
-            marker=markerStim, markerColor=textColor, markerExpansion=1, singleClick=False, disappear=False, \
-            textSize=0.8, textColor=textColor, textFont='Arial Hebrew', showValue=False, \
-            showAccept=False, acceptKeys=selectKey, acceptPreText='key, click', acceptText='accept?', acceptSize=1.0, \
-            leftKeys=downKey, rightKeys=upKey, respKeys=(), lineColor=textColor, skipKeys=['q','escape'], \
-            mouseOnly=False, noMouse=hideMouse, size=2.0, stretch=1.0, pos=pos, minTime=0.4, maxTime=questionDur, \
+        ratingScale = ratingscale.RatingScale(win, scale=questions_list[iQ],
+            low=0., high=100., markerStart=50., precision=.5, labels=options_list[iQ], tickMarks=tickMarks, tickHeight=tickHeight,
+            marker=markerStim, markerColor=textColor, markerExpansion=1, singleClick=False, disappear=False,
+            textSize=0.8, textColor=textColor, textFont='Arial Hebrew', showValue=False,
+            showAccept=False, acceptKeys=selectKey, acceptPreText='key, click', acceptText='accept?', acceptSize=1.0,
+            leftKeys='3', rightKeys='2',  # Dummy keys to avoid double step
+            respKeys=(), lineColor=textColor, skipKeys=['q','escape'],
+            mouseOnly=False, noMouse=hideMouse, size=2.0, stretch=1.0, pos=pos, minTime=0.4, maxTime=questionDur,
             flipVert=False, depth=0, name='%s%d'%(name,iQ), autoLog=True)
         # Fix text wrapWidth
         for iLabel in range(len(ratingScale.labels)):
@@ -63,40 +54,32 @@ def ShowVAS(questions_list, options_list, win, name='Question', questionDur=floa
         # Display until time runs out (or key is pressed, if specified)
         win.logOnFlip(level=logging.EXP, msg='Display %s%d'%(name,iQ))
         tStart = time.time()
-        while (time.time()-tStart)<questionDur:
-            # Look for keypresses
-            if keyState[getattr(key,downKey_attr)]: #returns True if left key is pressed
-                tPress = time.time()
-                valPress = ratingScale.markerPlacedAt
-                keyPressed = downKey_attr
-                step = -stepSize
-            elif keyState[getattr(key,upKey_attr)]: #returns True if the right key is pressed
-                tPress = time.time()
-                valPress = ratingScale.markerPlacedAt
-                keyPressed = upKey_attr
-                step = stepSize
-            else:
-                keyPressed = None
+        accept = False
 
-            # Handle sliding for held keys
-            while (keyPressed is not None) and ((time.time()-tStart)<questionDur):
-                # update time
-                durPress = time.time()-tPress
-                # update display
-                ratingScale.draw()
-                win.flip()
-                # check for key release
-                if keyState[getattr(key,keyPressed)]==False:
+        while (time.time()-tStart)<questionDur and not accept:
+            for event in keyboard.getKeys(etype=Keyboard.KEY_PRESS):
+                if event.key == "escape":
+                    win.close()
+                    core.quit()
+                elif event.key in [selectKey, ' ']:
+                    accept = True
                     break
-                # Update marker
-                if durPress>repeatDelay:
-                    ratingScale.markerPlacedAt = valPress + (durPress-repeatDelay)*step*60 # *60 for refresh rate
-                    ratingScale.markerPlacedAt = max(ratingScale.markerPlacedAt,ratingScale.low)
-                    ratingScale.markerPlacedAt = min(ratingScale.markerPlacedAt,ratingScale.high)
-            # Check for response
-            if isEndedByKeypress and not ratingScale.noResponse:
-                break
-            # Redraw
+                elif event.key in [upKey, downKey]:
+                    key_hold = True
+                    tPress = time.time()
+                    keyPressed = event.key
+                    step = stepSize if keyPressed == upKey else -stepSize
+                    while key_hold:
+                        valPress = ratingScale.markerPlacedAt
+                        ratingScale.markerPlacedAt = max(valPress + step, ratingScale.low)
+                        ratingScale.markerPlacedAt = min(valPress + step, ratingScale.high)
+                        ratingScale.draw()
+                        win.flip()
+                        for releaseEvent in keyboard.getKeys(etype=Keyboard.KEY_RELEASE):
+                            if releaseEvent.key == keyPressed:
+                                key_hold = False
+                        core.wait(0.05)
+
             ratingScale.draw()
             win.flip()
 
