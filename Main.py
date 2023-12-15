@@ -470,11 +470,11 @@ def GrowingSquare(color, block, trial, params):
     if color == 2:
         col = 'darkseagreen'
         colCode = int('8fbc8f', 16)
-        colorName = 'Green'
+        colorName = 'Yellow'
     elif color == 3:
         col = 'khaki'
         colCode = int('FFFF00', 16)     #colCode = int('F0E68C', 16)
-        colorName = 'Yellow'
+        colorName = 'Orange'
     elif color == 4:
         col = 'lightcoral'
         colCode = int('D21404', 16)     #colCode = int('F08080', 16)
@@ -490,7 +490,7 @@ def GrowingSquare(color, block, trial, params):
     # Load pre-defined images of square at different sizes
     squareImages = []
     for i in range(1, 6):
-        squareImages.append(visual.ImageStim(win, image=f"Circles2/{color}{colorName}_{i}.JPG", pos=(0, 0)))
+        squareImages.append(visual.ImageStim(win, image=f"squares/{color}{colorName}_{i}.jpeg", pos=(0, 0)))
 
     # adjusting squares to fit a 24-inch screen
     for i in range(len(squareImages) - 1):
@@ -522,7 +522,7 @@ def GrowingSquare(color, block, trial, params):
             core.wait(square_duration)
         else:
             core.wait(1)
-            curr_image.image = "Circles2/blank.png"
+            curr_image.image = "squares/blank.jpg"
             curr_image.draw()
             win.flip()
             core.wait(square_duration - 1)
