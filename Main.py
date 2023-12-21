@@ -348,7 +348,7 @@ tNextFlip = [0.0]  # put in a list to make it mutable (weird quirk of python var
 
 # create clocks and window
 globalClock = core.Clock()  # to keep track of time
-win = visual.Window(screenRes, fullscr=False, monitor='testMonitor',
+win = visual.Window(screenRes, fullscr=True, monitor='testMonitor',
                     screen=params['screenToShow'], units='deg', name='win', color=params['screenColor'],
                     colorSpace='rgb255')
 win.setMouseVisible(False)
@@ -490,13 +490,13 @@ def GrowingSquare(color, block, trial, params):
     # Load pre-defined images of square at different sizes
     squareImages = []
     for i in range(1, 6):
-        squareImages.append(visual.ImageStim(win, image=f"squares/{color}{colorName}_{i}.jpeg", pos=(0, 0)))
+        squareImages.append(visual.ImageStim(win, image=f"squares/{color}{colorName}_{i}.jpeg", pos=(0, 0), size=(2,2), units="norm"))
 
-    # adjusting squares to fit a 24-inch screen
-    for i in range(len(squareImages) - 1):
-        squareImages[i].size = (squareImages[i].size[0] * 1.5, squareImages[i].size[1] * 1.4)
-    # make last square cover the entire screen
-    squareImages[len(squareImages) - 1].size *= 2
+    # # adjusting squares to fit a 24-inch screen
+    # for i in range(len(squareImages) - 1):
+    #     squareImages[i].size = (squareImages[i].size[0] * 1.5, squareImages[i].size[1] * 1.4)
+    # # make last square cover the entire screen
+    # squareImages[len(squareImages) - 1].size *= 2
 
     WaitForFlipTime()
     # gray color = during the instructions
