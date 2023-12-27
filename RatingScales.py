@@ -59,6 +59,7 @@ def ShowVAS(questions_list, options_list, win, io, name='Question', questionDur=
 
         print(f"Current time - {time.time()}, VAS should last until {time.time() + questionDur}")
 
+        keyboard.getKeys(etype=Keyboard.KEY_PRESS)
         while time.time() < end_time and not accept:
             for event in keyboard.getKeys(etype=Keyboard.KEY_PRESS):
                 if event.key == "escape":
