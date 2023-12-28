@@ -184,15 +184,6 @@ params = {
     'vasStepSize': 0.5,  # how far the slider moves with a keypress (increase to move faster)
     'textColor': 'gray',  # black in rgb255 space or gray in rgb space
     'PreVasMsg': reverse_string("כעת נבצע דירוגים"),  # Text shown BEFORE each VAS except the final one
-    'introPractice': 'Questions/PracticeRating.txt',  # Name of text file containing practice rating scales
-    'moodQuestionFile1': 'Questions/ERVas1RatingScales.txt',
-    # Name of text file containing mood Q&As presented before run
-    'moodQuestionFile2': 'Questions/ERVasRatingScales.txt',
-    # Name of text file containing mood Q&As presented after 3rd block
-    'moodQuestionFile3': 'Questions/ERVas4RatingScales.txt',
-    # Name of text file containing pain Rating Scale presented after each trial
-    'MoodRatingPainFile': 'Questions/MoodRatingPainFile.txt',
-    # Name of text file containing mood Q&As presented after run
     'questionSelectKey': 'up',  # select answer for VAS
     'questionSelectAdvances': True,  # will locking in an answer advance past an image rating?
     'vasTextColor': 'black',  # color of text in both VAS types (-1,-1,-1) = black
@@ -268,6 +259,16 @@ params['skipInstructions'] = expInfo['Skip Instructions']
 params['language'] = expInfo['Language']
 params['continuousShape'] = expInfo['Continuous Shape']
 
+params['introPractice'] = f'Questions/{params["language"]}/PracticeRating.txt'  # Name of text file containing practice rating scales
+params['moodQuestionFile1'] = f'Questions/{params["language"]}/ERVas1RatingScales.txt'
+# Name of text file containing mood Q&As presented before run
+params['moodQuestionFile2'] = f'Questions/{params["language"]}/ERVasRatingScales.txt'
+# Name of text file containing mood Q&As presented after 3rd block
+params['moodQuestionFile3'] = f'Questions/{params["language"]}/ERVas4RatingScales.txt'
+# Name of text file containing pain Rating Scale presented after each trial
+params['MoodRatingPainFile'] = f'Questions/{params["language"]}/MoodRatingPainFile.txt'
+# Name of text file containing mood Q&As presented after run
+
 # save experimental info
 toFile('%s-lastExpInfo.psydat' % scriptName, expInfo)  # save params to file for next time
 
@@ -302,7 +303,7 @@ def write_to_csv(info_to_csv, name_csv_file):
     writer.writerow(info_to_csv)
 
 params['instructionsFolder'] = './instructions/instructions'
-if params['language'] == 'english':
+if params['language'] == 'English':
     params['instructionsSuffix'] = '_E'
 elif expInfo['Gender'] == 'female':
     params['instructionsSuffix'] = '_F'
