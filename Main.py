@@ -302,7 +302,7 @@ def write_to_csv(info_to_csv, name_csv_file):
     writer.writerow(info_to_csv)
 
 params['instructionsFolder'] = './instructions/instructions'
-if params['language'] == 'english':
+if params['language'] == 'English':
     params['instructionsSuffix'] = '_E'
 elif expInfo['Gender'] == 'female':
     params['instructionsSuffix'] = '_F'
