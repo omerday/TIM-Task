@@ -498,6 +498,7 @@ def GrowingSquare(color, block, trial, params):
     # # make last square cover the entire screen
     # squareImages[len(squareImages) - 1].size *= 2
 
+
     WaitForFlipTime()
     # gray color = during the instructions
     if col != 'gray':
@@ -514,6 +515,9 @@ def GrowingSquare(color, block, trial, params):
         print("color " + str(color) + 'i: '+str(i-1))
         # send event to biopac
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_square' + str(i))
+
+        if i == 3:
+            my_pathway.sendCommand("START")
 
         # Wait for specified duration
         square_duration = random.randint(params['squareDurationMin'], params['squareDurationMax'])
@@ -644,6 +648,7 @@ def SetPort(color, size, block, csv_writer):
             # send command to biopac with parameter matching from excel
             print(f"Selecting TP,  {code.iat[0, 1]}")
             response = my_pathway.sendCommand('SELECT_TP', code.iat[0, 1])
+            print(response)
             core.wait(1)
             my_pathway.sendCommand('START')
 
