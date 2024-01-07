@@ -210,8 +210,8 @@ params = {
     'codeFixation': 143,  # parallel port code for fixation period - safe
     'codeReady': 145,  # parallel port code for Get ready stimulus
     'codeVAS': 142,  # parallel port code for 3 VASs
-    'squareDurationMin': 3, # minimum duration for each square
-    'squareDurationMax': 6, # maximum duration for each square
+    'squareDurationMin': 4, # minimum duration for each square
+    'squareDurationMax': 7, # maximum duration for each square
     'painRateDuration': 7, # pain rating duration
     'convExcel': 'tempConv.xlsx',  # excel file with temp to binary code mappings
     # 'image1': 'img/image1.png',
@@ -498,6 +498,7 @@ def GrowingSquare(color, block, trial, params):
     # # make last square cover the entire screen
     # squareImages[len(squareImages) - 1].size *= 2
 
+
     WaitForFlipTime()
     # gray color = during the instructions
     if col != 'gray':
@@ -514,6 +515,9 @@ def GrowingSquare(color, block, trial, params):
         print("color " + str(color) + 'i: '+str(i-1))
         # send event to biopac
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_square' + str(i))
+
+        if i == 2:
+            my_pathway.sendCommand("START")
 
         # Wait for specified duration
         square_duration = random.randint(params['squareDurationMin'], params['squareDurationMax'])
@@ -551,9 +555,9 @@ def GrowingSquare(color, block, trial, params):
         # starts a Medoc device connected to the computer running the script
         if params['painSupport']:
             # my_pathway.start()
-            print(f"Starting sequence before sleep, line 562, round {round}")
-            my_pathway.sendCommand('START')
-            print("Sent command start")
+            # print(f"Starting sequence before sleep, line 562, round {round}")
+            # my_pathway.sendCommand('START')
+            # print("Sent command start")
             core.wait(0.5)
             my_pathway.sendCommand('TRIGGER')
             print("Sent command trigger")
@@ -644,8 +648,9 @@ def SetPort(color, size, block, csv_writer):
             # send command to biopac with parameter matching from excel
             print(f"Selecting TP,  {code.iat[0, 1]}")
             response = my_pathway.sendCommand('SELECT_TP', code.iat[0, 1])
-            core.wait(1)
-            my_pathway.sendCommand('START')
+            print(response)
+            # core.wait(1)
+            # my_pathway.sendCommand('START')
 
             # Trigger the device to start the heat pulse
             # my_pathway.trigger()
