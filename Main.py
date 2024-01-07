@@ -210,8 +210,8 @@ params = {
     'codeFixation': 143,  # parallel port code for fixation period - safe
     'codeReady': 145,  # parallel port code for Get ready stimulus
     'codeVAS': 142,  # parallel port code for 3 VASs
-    'squareDurationMin': 3, # minimum duration for each square
-    'squareDurationMax': 6, # maximum duration for each square
+    'squareDurationMin': 4, # minimum duration for each square
+    'squareDurationMax': 7, # maximum duration for each square
     'painRateDuration': 7, # pain rating duration
     'convExcel': 'tempConv.xlsx',  # excel file with temp to binary code mappings
     # 'image1': 'img/image1.png',
