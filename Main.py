@@ -516,7 +516,7 @@ def GrowingSquare(color, block, trial, params):
         # send event to biopac
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_square' + str(i))
 
-        if i == 3:
+        if i == 2:
             my_pathway.sendCommand("START")
 
         # Wait for specified duration
@@ -555,9 +555,9 @@ def GrowingSquare(color, block, trial, params):
         # starts a Medoc device connected to the computer running the script
         if params['painSupport']:
             # my_pathway.start()
-            print(f"Starting sequence before sleep, line 562, round {round}")
-            my_pathway.sendCommand('START')
-            print("Sent command start")
+            # print(f"Starting sequence before sleep, line 562, round {round}")
+            # my_pathway.sendCommand('START')
+            # print("Sent command start")
             core.wait(0.5)
             my_pathway.sendCommand('TRIGGER')
             print("Sent command trigger")
@@ -649,8 +649,8 @@ def SetPort(color, size, block, csv_writer):
             print(f"Selecting TP,  {code.iat[0, 1]}")
             response = my_pathway.sendCommand('SELECT_TP', code.iat[0, 1])
             print(response)
-            core.wait(1)
-            my_pathway.sendCommand('START')
+            # core.wait(1)
+            # my_pathway.sendCommand('START')
 
             # Trigger the device to start the heat pulse
             # my_pathway.trigger()
