@@ -522,7 +522,7 @@ def GrowingSquare(color, block, trial, params):
         # Wait for specified duration
         square_duration = random.randint(params['squareDurationMin'], params['squareDurationMax'])
 
-        if params['continuousShape']:
+        if params['continuousShape'] or i == 5:
             core.wait(square_duration)
         else:
             core.wait(1)
