@@ -820,7 +820,7 @@ for block in range(0, params['nBlocks']):
                 HelperFunctions.wait_for_space(win, io)
                 WaitForFlipTime()
                 SetPortData(params['codeVAS'])
-                RatingScales.run_vas(win, io, params, "Mood")
+                scores = RatingScales.run_vas(win, io, params, "Mood")
                 # RunMoodVas(questions_vas1, options_vas1, name='PreVAS', io=io)
                 if params['painSupport']:
                     report_event('PreVAS', 'PreVas_rating')

@@ -1,4 +1,3 @@
-from mpmath import inf
 from psychopy import core, event, logging, visual
 import time
 from psychopy.iohub.client.keyboard import Keyboard
