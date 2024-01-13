@@ -37,7 +37,6 @@ def run_vas(window: visual.Window, io, params: dict, type:str, duration=float('i
     keyboard = io.devices.keyboard
 
     scores = {}
-    scores.keys = LABELS
 
     for i in range(len(questions)):
         scale = ratingscale.RatingScale(window,
@@ -57,7 +56,7 @@ def run_vas(window: visual.Window, io, params: dict, type:str, duration=float('i
 
         end_time = time.time() + duration
         accept = False
-        while (duration != float(inf) and time.time() < end_time) or (duration == float(inf) and scale.noResponse() and not accept):
+        while (duration != float(inf) and time.time() < end_time) or (duration == float(inf) and scale.noResponse and not accept):
             scale.draw()
             question_label.draw()
             window.flip()

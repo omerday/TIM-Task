@@ -820,7 +820,8 @@ for block in range(0, params['nBlocks']):
                 HelperFunctions.wait_for_space(win, io)
                 WaitForFlipTime()
                 SetPortData(params['codeVAS'])
-                RunMoodVas(questions_vas1, options_vas1, name='PreVAS', io=io)
+                RatingScales.run_vas(win, io, params, "Mood")
+                # RunMoodVas(questions_vas1, options_vas1, name='PreVAS', io=io)
                 if params['painSupport']:
                     report_event('PreVAS', 'PreVas_rating')
                 # RunPrompts() We don't use "Run Prompts", but give instructions as text
@@ -840,7 +841,8 @@ for block in range(0, params['nBlocks']):
         fixation.autoDraw = False
 
         # Run VAS after 2nd block
-        RunMoodVas(questions_vas2, options_vas2, name='MidRun', io=io)
+        RatingScales.run_vas(win, io, params, "Mood")
+        # RunMoodVas(questions_vas2, options_vas2, name='MidRun', io=io)
         report_event('MidRun', 'MidRun_rating')
 
         # Rest slide
@@ -907,7 +909,8 @@ for block in range(0, params['nBlocks']):
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
         painITI += 1
-        rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
+        rating = RatingScales.run_vas(win, io, params, "PainRating")
+        # rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         WaitForFlipTime()
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
@@ -942,7 +945,8 @@ for block in range(0, params['nBlocks']):
 
 WaitForFlipTime()  # This waits for the next screen refresh.
 
-RunMoodVas(questions_vas3, options_vas3, name='PostRun', io=io)  # This displays a mood VAS after the experiment is completed.
+RatingScales.run_vas(win, io, params, "Mood")
+# RunMoodVas(questions_vas3, options_vas3, name='PostRun', io=io)  # This displays a mood VAS after the experiment is completed.
 report_event('PostRun', 'PostRun_rating')
 
 WaitForFlipTime()  # This waits for the next screen refresh.
