@@ -516,7 +516,7 @@ def GrowingSquare(color, block, trial, params):
         # send event to biopac
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_square' + str(i))
 
-        if i == 2:
+        if i == 2 and params['painSupport']:
             my_pathway.sendCommand("START")
 
         # Wait for specified duration
