@@ -909,7 +909,7 @@ for block in range(0, params['nBlocks']):
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
         painITI += 1
-        rating = RatingScales.run_vas(win, io, params, "PainRating")
+        rating = RatingScales.run_vas(win, io, params, "PainRating", params['questionDur'])
         # rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         WaitForFlipTime()

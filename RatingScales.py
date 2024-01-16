@@ -3,11 +3,11 @@ import time
 from psychopy.iohub.client.keyboard import Keyboard
 from psychopy.visual import ratingscale
 
-MOOD_RATING_QUESTION_HEBREW = "עד כמה כאב החום?"
-MOOD_RATING_QUESTION_ENGLISH = "How painful was the heat?"
+MOOD_RATING_QUESTION_HEBREW = ["עד כמה כאב החום?"]
+MOOD_RATING_QUESTION_ENGLISH = ["How painful was the heat?"]
 
-MOOD_RATING_ANSWERS_HEBREW = ["בכלל לא", "מאוד"]
-MOOD_RATING_ANSWERS_ENGLISH = ["Not at all", "A lot"]
+MOOD_RATING_ANSWERS_HEBREW = [["בכלל לא", "מאוד"]]
+MOOD_RATING_ANSWERS_ENGLISH = [["Not at all", "A lot"]]
 
 LABELS = ["Anxiety", "Tiredness", "Worry", "Mood", "PainSensitivity"]
 
@@ -41,7 +41,7 @@ def run_vas(window: visual.Window, io, params: dict, type:str, duration=float('i
         scale = ratingscale.RatingScale(window,
                                         labels=[answers[i][0][::-1], answers[i][1][::-1]]
                                             if params['language'] == 'Hebrew' else [answers[i][0],answers[i][1]],
-                                        scale=None, choices=None, low=1, high=100, precision=1, tickHeight=0, size=2,
+                                        scale=None, choices=None, low=1, high=100, precision=1, tickHeight=.5, size=2,
                                         markerStart=50, noMouse=True, leftKeys=1, rightKeys=2,  # Dummy left and right
                                         textSize=0.6, acceptText="לחצו על הרווח"[::-1] if params['language'] == "Hebrew" else "Press Spacebar", showValue=False, showAccept=True,
                                         acceptPreText="לחצו על הרווח"[::-1] if params['language'] == "Hebrew" else "Press Spacebar", acceptSize=1.5,
@@ -55,7 +55,7 @@ def run_vas(window: visual.Window, io, params: dict, type:str, duration=float('i
 
         end_time = time.time() + duration
         accept = False
-        while (duration != float(inf) and time.time() < end_time) or (duration == float(inf) and scale.noResponse and not accept):
+        while (duration != float("inf") and time.time() < end_time) or (duration == float("inf") and scale.noResponse and not accept):
             scale.draw()
             question_label.draw()
             window.flip()
