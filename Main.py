@@ -184,15 +184,6 @@ params = {
     'vasStepSize': 0.5,  # how far the slider moves with a keypress (increase to move faster)
     'textColor': 'gray',  # black in rgb255 space or gray in rgb space
     'PreVasMsg': reverse_string("כעת נבצע דירוגים"),  # Text shown BEFORE each VAS except the final one
-    'introPractice': 'Questions/PracticeRating.txt',  # Name of text file containing practice rating scales
-    'moodQuestionFile1': 'Questions/ERVas1RatingScales.txt',
-    # Name of text file containing mood Q&As presented before run
-    'moodQuestionFile2': 'Questions/ERVasRatingScales.txt',
-    # Name of text file containing mood Q&As presented after 3rd block
-    'moodQuestionFile3': 'Questions/ERVas4RatingScales.txt',
-    # Name of text file containing pain Rating Scale presented after each trial
-    'MoodRatingPainFile': 'Questions/MoodRatingPainFile.txt',
-    # Name of text file containing mood Q&As presented after run
     'questionSelectKey': 'up',  # select answer for VAS
     'questionSelectAdvances': True,  # will locking in an answer advance past an image rating?
     'vasTextColor': 'black',  # color of text in both VAS types (-1,-1,-1) = black
@@ -267,6 +258,16 @@ params['painSupport'] = expInfo['Pain Support']
 params['skipInstructions'] = expInfo['Skip Instructions']
 params['language'] = expInfo['Language']
 params['continuousShape'] = expInfo['Continuous Shape']
+
+params['introPractice'] = f'Questions/{params["language"]}/PracticeRating.txt'  # Name of text file containing practice rating scales
+params['moodQuestionFile1'] = f'Questions/{params["language"]}/ERVas1RatingScales.txt'
+# Name of text file containing mood Q&As presented before run
+params['moodQuestionFile2'] = f'Questions/{params["language"]}/ERVasRatingScales.txt'
+# Name of text file containing mood Q&As presented after 3rd block
+params['moodQuestionFile3'] = f'Questions/{params["language"]}/ERVas4RatingScales.txt'
+# Name of text file containing pain Rating Scale presented after each trial
+params['MoodRatingPainFile'] = f'Questions/{params["language"]}/MoodRatingPainFile.txt'
+# Name of text file containing mood Q&As presented after run
 
 # save experimental info
 toFile('%s-lastExpInfo.psydat' % scriptName, expInfo)  # save params to file for next time
@@ -698,10 +699,10 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
     # display pre-VAS prompt
     if not params['skipPrompts']:
         if expInfo['gender'] == 'female':
-            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחצי על כל מקש כדי להמשיך")], win, message1,
+            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחצי על כל מקש כדי להמשיך")] if params['language'] == 'Hebrew' else ["Press any key to continue"], win, message1,
                                     message2)
         else:
-            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחץ על כל מקש כדי להמשיך")], win, message1,
+            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחץ על כל מקש כדי להמשיך")] if params['language'] == 'Hebrew' else ["Press any key to continue"], win, message1,
                                     message2)
 
     # Display this VAS
@@ -741,11 +742,15 @@ def CoolDown():
                       columns=['Absolute Time', 'Block', 'Trial', 'Color', 'Trial Time', 'Phase', 'Phase Time'])
     df.to_csv('avgFile%s.csv' % expInfo['subject'])
 
-    message1.setText(reverse_string("הגענו לסוף הניסוי. תודה על ההשתתפות!"))
-    if expInfo['Gender'] == 'female':
-        message2.setText(reverse_string("לחצי על אסקייפ כדי לסיים"))
-    else:    
-        message2.setText(reverse_string("לחץ על אסקייפ כדי לסיים"))
+    if params['language'] == 'Hebrew':
+        message1.setText(reverse_string("הגענו לסוף הניסוי. תודה על ההשתתפות!"))
+        if expInfo['Gender'] == 'female':
+            message2.setText(reverse_string("לחצי על אסקייפ כדי לסיים"))
+        else:
+            message2.setText(reverse_string("לחץ על אסקייפ כדי לסיים"))
+    else:
+        message1.setText("We have reached the end of the experiment,\nThank you for participating!")
+        message2.setText("Press escape to finish")
     win.logOnFlip(level=logging.EXP, msg='Display TheEnd')
 
     message1.setFont('Arial Hebrew')
@@ -772,8 +777,12 @@ def BetweenBlock(params):
     tNextFlip[0] = globalClock.getTime() + 1.0
 
     # COMMENTED OUT NEED TO PRESS SPACE BEFORE PROCEEDING TO NEXT SLIDE
-    message1.setText(reverse_string("הסתיים הבלוק הנוכחי"))
-    message2.setText(reverse_string("לחץ על מקש הרווח כדי להתקדם"))
+    if params['language'] == 'Hebrew':
+        message1.setText(reverse_string("הסתיים הבלוק הנוכחי"))
+        message2.setText(reverse_string("לחץ על מקש הרווח כדי להתקדם"))
+    else:
+        message1.setText("The current block has ended")
+        message2.setText("Press the spacebar to proceed")
     win.logOnFlip(level=logging.EXP, msg='BetweenBlock')
     #
     message1.setFont('Arial Hebrew')
@@ -824,7 +833,8 @@ for block in range(0, params['nBlocks']):
                 HelperFunctions.wait_for_space(win, io)
                 WaitForFlipTime()
                 SetPortData(params['codeVAS'])
-                RunMoodVas(questions_vas1, options_vas1, name='PreVAS', io=io)
+                scores = RatingScales.run_vas(win, io, params, "Mood")
+                # RunMoodVas(questions_vas1, options_vas1, name='PreVAS', io=io)
                 if params['painSupport']:
                     report_event('PreVAS', 'PreVas_rating')
                 # RunPrompts() We don't use "Run Prompts", but give instructions as text
@@ -844,7 +854,8 @@ for block in range(0, params['nBlocks']):
         fixation.autoDraw = False
 
         # Run VAS after 2nd block
-        RunMoodVas(questions_vas2, options_vas2, name='MidRun', io=io)
+        RatingScales.run_vas(win, io, params, "Mood")
+        # RunMoodVas(questions_vas2, options_vas2, name='MidRun', io=io)
         report_event('MidRun', 'MidRun_rating')
 
         # Rest slide
@@ -911,7 +922,8 @@ for block in range(0, params['nBlocks']):
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
         painITI += 1
-        rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
+        rating = RatingScales.run_vas(win, io, params, "PainRating", params['questionDur'])
+        # rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         WaitForFlipTime()
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
@@ -946,7 +958,8 @@ for block in range(0, params['nBlocks']):
 
 WaitForFlipTime()  # This waits for the next screen refresh.
 
-RunMoodVas(questions_vas3, options_vas3, name='PostRun', io=io)  # This displays a mood VAS after the experiment is completed.
+RatingScales.run_vas(win, io, params, "Mood")
+# RunMoodVas(questions_vas3, options_vas3, name='PostRun', io=io)  # This displays a mood VAS after the experiment is completed.
 report_event('PostRun', 'PostRun_rating')
 
 WaitForFlipTime()  # This waits for the next screen refresh.

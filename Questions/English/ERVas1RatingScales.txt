@@ -1,0 +1,70 @@
+### QUESTION 1: Anxiety
+?How anxious or stressed are you feeling right now?
+-Not at all
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-A lot
+
+
+### QUESTION 2: Tired
+?How tired are you?
+-Not at all
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-A lot
+
+### QUESTION 3: Worried
+?How worried are you from the next part of the experiment?
+-Not at all
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-A lot
+
+### QUESTION 4: Mood
+?How is your mood right now?
+-Not good
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-Very good
+
+### QUESTION 5: Pain sensitivity
+?How sensitive are you to pain?
+-Not at all
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-a lot
