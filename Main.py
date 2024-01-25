@@ -694,10 +694,10 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
     # display pre-VAS prompt
     if not params['skipPrompts']:
         if expInfo['gender'] == 'female':
-            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחצי על כל מקש כדי להמשיך")], win, message1,
+            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחצי על כל מקש כדי להמשיך")] if params['language'] == 'Hebrew' else ["Press any key to continue"], win, message1,
                                     message2)
         else:
-            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחץ על כל מקש כדי להמשיך")], win, message1,
+            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחץ על כל מקש כדי להמשיך")] if params['language'] == 'Hebrew' else ["Press any key to continue"], win, message1,
                                     message2)
 
     # Display this VAS
@@ -737,11 +737,15 @@ def CoolDown():
                       columns=['Absolute Time', 'Block', 'Trial', 'Color', 'Trial Time', 'Phase', 'Phase Time'])
     df.to_csv('avgFile%s.csv' % expInfo['subject'])
 
-    message1.setText(reverse_string("הגענו לסוף הניסוי. תודה על ההשתתפות!"))
-    if expInfo['Gender'] == 'female':
-        message2.setText(reverse_string("לחצי על אסקייפ כדי לסיים"))
-    else:    
-        message2.setText(reverse_string("לחץ על אסקייפ כדי לסיים"))
+    if params['language'] == 'Hebrew':
+        message1.setText(reverse_string("הגענו לסוף הניסוי. תודה על ההשתתפות!"))
+        if expInfo['Gender'] == 'female':
+            message2.setText(reverse_string("לחצי על אסקייפ כדי לסיים"))
+        else:
+            message2.setText(reverse_string("לחץ על אסקייפ כדי לסיים"))
+    else:
+        message1.setText("We have reached the end of the experiment,\nThank you for participating!")
+        message2.setText("Press escape to finish")
     win.logOnFlip(level=logging.EXP, msg='Display TheEnd')
 
     message1.setFont('Arial Hebrew')
@@ -768,8 +772,12 @@ def BetweenBlock(params):
     tNextFlip[0] = globalClock.getTime() + 1.0
 
     # COMMENTED OUT NEED TO PRESS SPACE BEFORE PROCEEDING TO NEXT SLIDE
-    message1.setText(reverse_string("הסתיים הבלוק הנוכחי"))
-    message2.setText(reverse_string("לחץ על מקש הרווח כדי להתקדם"))
+    if params['language'] == 'Hebrew':
+        message1.setText(reverse_string("הסתיים הבלוק הנוכחי"))
+        message2.setText(reverse_string("לחץ על מקש הרווח כדי להתקדם"))
+    else:
+        message1.setText("The current block has ended")
+        message2.setText("Press the spacebar to proceed")
     win.logOnFlip(level=logging.EXP, msg='BetweenBlock')
     #
     message1.setFont('Arial Hebrew')
