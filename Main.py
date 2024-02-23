@@ -27,6 +27,8 @@ import serial
 import serial.tools.list_ports as list_ports
 from psychopy.iohub import launchHubServer
 from time import strftime, localtime
+from medoc_api.tsa_device import TsaDevice
+from medoc_api import enums
 
 
 
@@ -314,27 +316,28 @@ else:
 # == SET UP PARALLEL PORT AND MEDOC == #
 # ==================================== #
 #
+device = None
 if params['painSupport']:
-    if params['sendPortEvents']:
-        from psychopy import parallel
+    device = TsaDevice(auto_connect_port=True)
+    device.event_patient_response.connect('y')
+    print("Connecting")
+    device.start_status_thread(0.1)
+    print("Initializing and Self-Test")
+    device.enable_thermode(enums.ThermodeType.TSA)
+    device.set_active_thermode(enums.ThermodeType.TSA)
 
-        port = parallel.ParallelPort(address=params['portAddress'])
-        port.setData(0)  # initialize to all zeros
-    else:
-        print("Parallel port not used.")
-
-
-if params['painSupport']:
-    # ip and port number from medoc application
-    my_pathway = Pathway(ip='10.0.0.11', port_number=20121)
-    print("mypathway create")
-
-    # Check status of medoc connection
-    # response = my_pathway.status()
-    response = my_pathway.sendCommand(0)
-    print("send command status was sent")
-    print(response)
-
+    set_rest_mode_res = device.set_tcu_state(enums.SystemState.RestMode, run_self_test=True, wait_for_state=True)
+    i = 0
+    while set_rest_mode_res == None and i < 3:
+        set_rest_mode_res = device.set_tcu_state(enums.SystemState.RestMode, run_self_test=True, wait_for_state=True)
+        i += 1
+    if set_rest_mode_res == None:
+        print("Failed to send RestMode (SelfTest) request, exiting")
+        device.finalize()
+        exit()
+    print("Self-Test finished")
+    print("Going into TestInit mode")
+    device.set_tcu_state(enums.SystemState.TestInit, run_self_test=True, wait_for_state=True)
 
 # ========================== #
 # ===== SET UP STIMULI ===== #
@@ -466,24 +469,24 @@ def GrowingSquare(color, block, trial, params):
     # set color of square
     if color == 1:
         col = 'white'
-        colCode = int('FFFFFF', 16)
         colorName = 'White'
+        temp = expInfo['T2']
     if color == 2:
-        col = 'darkseagreen'
-        colCode = int('8fbc8f', 16)
+        col = 'yellow'
         colorName = 'Yellow'
+        temp = expInfo['T4']
     elif color == 3:
-        col = 'khaki'
-        colCode = int('FFFF00', 16)     #colCode = int('F0E68C', 16)
+        col = 'orange'
         colorName = 'Orange'
+        temp = expInfo['T6']
     elif color == 4:
-        col = 'lightcoral'
-        colCode = int('D21404', 16)     #colCode = int('F08080', 16)
+        col = 'red'
         colorName = 'Red'
+        temp = expInfo['T8']
     else:
         col = 'white'
-        colCode = int('FFFFFF', 16)
         colorName = 'White'
+        temp = expInfo['T2']
 
     trialStart = globalClock.getTime()
     phaseStart = globalClock.getTime()
@@ -516,9 +519,6 @@ def GrowingSquare(color, block, trial, params):
         print("color " + str(color) + 'i: '+str(i-1))
         # send event to biopac
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_square' + str(i))
-
-        if i == 2 and params['painSupport']:
-            my_pathway.sendCommand("START")
 
         # Wait for specified duration
         square_duration = random.randint(params['squareDurationMin'], params['squareDurationMax'])
@@ -553,17 +553,6 @@ def GrowingSquare(color, block, trial, params):
         phaseStart = globalClock.getTime()
         #  sets a time at which the next stimulus or event should occur
         tNextFlip[0] = globalClock.getTime() + (params['painDur'])
-        # starts a Medoc device connected to the computer running the script
-        if params['painSupport']:
-            # my_pathway.start()
-            # print(f"Starting sequence before sleep, line 562, round {round}")
-            # my_pathway.sendCommand('START')
-            # print("Sent command start")
-            core.wait(0.5)
-            my_pathway.sendCommand('TRIGGER')
-            print("Sent command trigger")
-            # send event to biopac
-            report_event(color_to_T_dict[color], color_to_T_dict[color] + '_heat_pulse')
         # make sure can update rating scale while delaying onset of heat pain
         timer = core.Clock()
         # add a randomized delay to the next event
@@ -583,50 +572,60 @@ def GrowingSquare(color, block, trial, params):
                     if thisKey[0] in ['q', 'escape']:  # escape keys
                         CoolDown()  # exit gracefully
         if params['painSupport']:
-            # Trigger the device to start the heat pulse
-            # my_pathway.trigger()
-            print(f"Starting sequence before sleep, line 589, round {round}")
-            my_pathway.sendCommand('START')
-            print("Sent command start")
-            print(f"Get status results - {my_pathway.sendCommand('GET_STATUS')}")
-            # core.wait(0.5)
-            # my_pathway.sendCommand('TRIGGER')
-        # give medoc time to give heat before signalling to stop
-        timer = core.Clock()
-        timer.add(1)
-        # stop the Medoc device from delivering the thermal stimulus.
-        if params['painSupport']:
-            # response = my_pathway.stop()
-            print("Stopping")
-            response = my_pathway.sendCommand('STOP')
-            core.wait(2)
-            #response = my_pathway.sendCommand('STOP')
-            stat = my_pathway.sendCommand('GET_STATUS').teststatestr
-            while(stat != "IDLE"):
-                core.wait(0.5)
-                stat = my_pathway.sendCommand('GET_STATUS').teststatestr
-                print(f"Get status result = {stat}")
-            
+            report_event(color_to_T_dict[color], color_to_T_dict[color] + '_heat_pulse')
+            print("Starting heat raise")
+            device.finite_ramp_by_temperature(temp, 0.1, 0.1, is_stop_on_response_unit_yes=False, time=1000)
+            print(f"State before run_test = {device.status_state}")
+            print(f"Temp before run_test = {device.status_temp}")
+            device.run_test()
+            temp_start_time = time.time()
+            while time.time() < temp_start_time + 1:
+                for curr_event in event.getKeys():
+                    if curr_event == 'escape':
+                        device.stop_test()
+                        win.close()
+                        core.quit()
+                core.wait(0.05)
+            device.stop_test()
+
+            print("Staying for 4 sec")
+            device.finite_ramp_by_temperature(temp, 0.1, 0.1, is_stop_on_response_unit_yes=False, time=4000)
+            print(f"State before run_test = {device.status_state}")
+            print(f"Temp before run_test = {device.status_temp}")
+            device.run_test()
+            temp_start_time = time.time()
+            while time.time() < temp_start_time + 1:
+                for curr_event in event.getKeys():
+                    if curr_event == 'escape':
+                        device.stop_test()
+                        win.close()
+                        core.quit()
+                core.wait(0.05)
+            device.stop_test()
+
+            print("lowering to baseline")
+            device.finite_ramp_by_temperature(32, 0.1, 0.1, is_stop_on_response_unit_yes=False, time=1500)
+            print(f"State before run_test = {device.status_state}")
+            print(f"Temp before run_test = {device.status_temp}")
+            device.run_test()
+            temp_start_time = time.time()
+            while time.time() < temp_start_time + 1:
+                for curr_event in event.getKeys():
+                    if curr_event == 'escape':
+                        device.stop_test()
+                        win.close()
+                        core.quit()
+                core.wait(0.05)
+            device.stop_test()
         # Flush the key buffer and mouse movements
         event.clearEvents()
 
     return trialStart, phaseStart
 
 
-# Send parallel port event
-def SetPortData(data):
-    if params['painSupport'] and params['sendPortEvents']:
-        logging.log(level=logging.EXP, msg='set port %s to %d' % (format(params['portAddress'], '#04x'), data))
-        port.setData(data)
-        print(data)
-    else:
-        if params['painSupport']:
-            print('Port event: %d' % data)
-
 
 # use color, size, and block to calculate data for SetPortData
 def SetPort(color, size, block, csv_writer):
-    SetPortData((color - 1) * 6 ** 2 + (size - 1) * 6 + (block))
     if size == 1:
         if color == 1:
             code = excelTemps[excelTemps['Temp'].astype(str).str.contains(str(expInfo['T2']))]
@@ -645,16 +644,6 @@ def SetPort(color, size, block, csv_writer):
             csv_writer.writerow(["medoc", code.iat[0, 1]])
             logging.log(level=logging.EXP, msg='set medoc %s' % (code.iat[0, 1]))
 
-        if params['painSupport']:
-            # send command to biopac with parameter matching from excel
-            print(f"Selecting TP,  {code.iat[0, 1]}")
-            response = my_pathway.sendCommand('SELECT_TP', code.iat[0, 1])
-            print(response)
-            # core.wait(1)
-            # my_pathway.sendCommand('START')
-
-            # Trigger the device to start the heat pulse
-            # my_pathway.trigger()
 
 # Handle end of a session
 
@@ -695,7 +684,6 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
     # Wait until it's time
     WaitForFlipTime()
 
-    SetPortData(params['codeBaseline'])
     # display pre-VAS prompt
     if not params['skipPrompts']:
         if expInfo['gender'] == 'female':
@@ -832,7 +820,6 @@ for block in range(0, params['nBlocks']):
                 win.flip()
                 HelperFunctions.wait_for_space(win, io)
                 WaitForFlipTime()
-                SetPortData(params['codeVAS'])
                 scores = RatingScales.run_vas(win, io, params, "Mood")
                 # RunMoodVas(questions_vas1, options_vas1, name='PreVAS', io=io)
                 if params['painSupport']:
@@ -888,9 +875,6 @@ for block in range(0, params['nBlocks']):
     # show screen and update next flip time
     win.flip()
     AddToFlipTime(1)
-
-    win.callOnFlip(SetPortData,
-                   data=params['codeBaseline'])  # Calls a function to set the port data to the baseline code.
 
     # Waits for 2 seconds before displaying the first stimulus.
     while (globalClock.getTime() < tNextFlip[0] + 2):
@@ -964,6 +948,9 @@ report_event('PostRun', 'PostRun_rating')
 
 WaitForFlipTime()  # This waits for the next screen refresh.
 
+device.end_test()
+device.stop_status_thread()
+device.finalize()
 # Log end of experiment
 logging.log(level=logging.EXP, msg='--- END EXPERIMENT ---')
 
