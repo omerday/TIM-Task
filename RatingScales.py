@@ -34,11 +34,12 @@ def run_vas(window: visual.Window, io, params: dict, type:str, duration=float('i
         answers = ANSWERS_HEBREW if params['language'] == 'Hebrew' else ANSWERS_ENGLISH
 
     keyboard = io.devices.keyboard
-    keyboard.getKeys()
 
     scores = {}
 
     for i in range(len(questions)):
+        keyboard.getKeys()
+        core.wait(0.05)
         if type == "PainRating":
             scale = ratingscale.RatingScale(window,
                                             scale=None, choices=None, low=0, high=10, precision=1, tickHeight=.5, size=2,
@@ -60,12 +61,10 @@ def run_vas(window: visual.Window, io, params: dict, type:str, duration=float('i
         question_label = visual.TextStim(window, text=questions[i][::-1] if params['language'] == 'Hebrew' else questions[i], height=.12, units='norm', pos=[0, 0.3], wrapWidth=2,
                                    font="Open Sans", color="Black")
 
-        core.wait(0.05)
         keyboard.getKeys()
-
+        core.wait(0.05)
         end_time = time.time() + duration
-        accept = False
-        while (duration != float("inf") and time.time() < end_time) or (duration == float("inf") and scale.noResponse and not accept):
+        while (duration != float("inf") and time.time() < end_time) or (duration == float("inf") and scale.noResponse):
             scale.draw()
             question_label.draw()
             window.flip()
@@ -73,6 +72,8 @@ def run_vas(window: visual.Window, io, params: dict, type:str, duration=float('i
                 if event.key == "escape":
                     window.close()
                     core.quit()
+
+                core.wait(0.05)
         score = scale.getRating()
         if type == "PainRating":
             return score
