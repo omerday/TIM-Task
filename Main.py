@@ -457,6 +457,30 @@ color_to_T_dict = {
             4: 'T8'
         }
 
+def iti():
+    blank_wait = random.uniform(3, 4)
+    cross_wait = random.uniform(3, 5)
+    win.flip()
+    blank_start = ts.time()
+    while ts.time() < blank_start + blank_wait:
+        for ev in event.getKeys():
+            if ev.key in ["esc", "escape", "q"]:
+                win.close()
+                core.quit()
+
+    img = visual.ImageStim(win, image="./img/PlusOnly.jpg", pos=(0, 0), size=(2,2), units="norm")
+    cross_start = ts.time()
+    img.draw()
+    win.flip()
+    while ts.time() < cross_start + cross_wait:
+        for ev in event.getKeys():
+            if ev.key in ["esc", "escape", "q"]:
+                win.close()
+                core.quit()
+
+    del img
+
+
 
 # main function that takes information to run through each trial
 def GrowingSquare(color, block, trial, params):
@@ -925,7 +949,8 @@ for block in range(0, params['nBlocks']):
         rating = RatingScales.run_vas(win, io, params, "PainRating", params['questionDur'])
         # rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
-        WaitForFlipTime()
+        # WaitForFlipTime()
+        iti()
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
 
         # Save new data to the DF:
