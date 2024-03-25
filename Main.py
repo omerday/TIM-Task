@@ -968,7 +968,7 @@ for block in range(0, params['nBlocks']):
         # Calls the GrowingSquare function to present the stimulus, and records the start time and phase start time.
         trialStart, phaseStart = GrowingSquare(color, block, trial, params)
         win.flip()  # Flips the screen and waits for 2 seconds.
-        core.wait(1)
+        core.wait(2)
 
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
