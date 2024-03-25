@@ -168,8 +168,8 @@ params = {
     # Declare stimulus and response parameters
     'startTime': ts.time(),
     'screenIdx': 0,
-    'nTrials': 8,  # number of squares in each block
-    'nBlocks': 5,  # number of blocks (aka runs) - need time to move electrode in between
+    'nTrials': 6,  # number of squares in each block
+    'nBlocks': 6,  # number of blocks (aka runs) - need time to move electrode in between
     'painDur': 4,  # time of heat sensation (in seconds)
     'tStartup': 5,  # pause time before starting first stimulus
     # declare prompt and question files
@@ -231,10 +231,11 @@ try:  # try to get a previous parameters file
                      "40.0", "40.5", "41.0", "41.5",
                      "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
                      "48.0", "48.5", "49.0", "49.5", "50.0"]
-    expInfo['T4'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
-                     "40.0", "40.5", "41.0", "41.5",
-                     "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
-                     "48.0", "48.5", "49.0", "49.5", "50.0"]
+    # Omer - Removed T4 for the three-temperature version. Maybe find a more elegant way to do that?
+    # expInfo['T4'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
+    #                  "40.0", "40.5", "41.0", "41.5",
+    #                  "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
+    #                  "48.0", "48.5", "49.0", "49.5", "50.0"]
     expInfo['T6'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
                      "40.0", "40.5", "41.0", "41.5",
                      "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
@@ -254,7 +255,8 @@ except:  # if not there then use a default set
         'Gender': 'female',
         'Language': 'Hebrew',
         'T2': '36.0',
-        'T4': '41.0',
+        # Omer - T4 Removal for three-temperatures version
+        # 'T4': '41.0',
         'T6': '46.0',
         'T8': '50.0',
         'Pain Support': True,
@@ -297,7 +299,8 @@ logging.log(level=logging.INFO, msg='filename: %s' % filename)
 logging.log(level=logging.INFO, msg='subject: %s' % expInfo['subject'])
 logging.log(level=logging.INFO, msg='session: %s' % expInfo['session'])
 logging.log(level=logging.INFO, msg='T2: %s' % expInfo['T2'])
-logging.log(level=logging.INFO, msg='T4: %s' % expInfo['T4'])
+# Omer - Removed T4
+# logging.log(level=logging.INFO, msg='T4: %s' % expInfo['T4'])
 logging.log(level=logging.INFO, msg='T6: %s' % expInfo['T6'])
 logging.log(level=logging.INFO, msg='T8: %s' % expInfo['T8'])
 logging.log(level=logging.INFO, msg='date: %s' % dateStr)
@@ -395,8 +398,8 @@ print('%d questions loaded from %s' % (len(questions), params['questionFile']))
 promptImage = 'TIMprompt2.jpg'
 stimImage = visual.ImageStim(win, pos=[0, 0], name='ImageStimulus', image=promptImage, units='pix')
 
-color_list = [1, 2, 3, 4, 1, 2, 3,
-              4]  # 1-white, 2-green, 3-yellow, 4-red, ensure each color is presented twice at random per block
+# Omer - Removed 2 from the list so we won't get a yellow square
+color_list = [1, 3, 4, 1, 3, 4]  # 1-white, 2-green, 3-yellow, 4-red, ensure each color is presented twice at random per block
 random.shuffle(color_list)
 
 sleepRand = [0, 0.5, 1, 1.5, 2]  # slightly vary onset of heat pain
@@ -566,7 +569,7 @@ def GrowingSquare(color, block, trial, params):
         if params['continuousShape'] or i == 5:
             core.wait(square_duration)
         else:
-            core.wait(1)
+            core.wait(random.uniform(1.5, 2))
             curr_image.image = "squares/blank.jpg"
             curr_image.draw()
             win.flip()
