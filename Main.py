@@ -73,37 +73,44 @@ def report_event(temp, event_type):
     events = {
         'break': hex(16),
 
-        'T2_square1': hex(20),
-        'T2_square2': hex(21),
-        'T2_square3': hex(22),
-        'T2_square4': hex(23),
-        'T2_square5': hex(24),
-        'T2_heat_pulse': hex(25),
-        'T2_PainRatingScale': hex(26),
+        'T2_ITI_Pre': hex(20),
+        'T2_square1': hex(21),
+        'T2_square2': hex(22),
+        'T2_square3': hex(23),
+        'T2_square4': hex(24),
+        'T2_square5': hex(25),
+        'T2_heat_pulse': hex(26),
+        'T2_PainRatingScale': hex(27),
+        'T2_ITI_Post': hex(28),
 
-        'T4_square1': hex(40),
-        'T4_square2': hex(41),
-        'T4_square3': hex(42),
-        'T4_square4': hex(43),
-        'T4_square5': hex(44),
-        'T4_heat_pulse': hex(45),
-        'T4_PainRatingScale': hex(46),
+        'T4_ITI_Pre': hex(40),
+        'T4_square1': hex(41),
+        'T4_square2': hex(42),
+        'T4_square3': hex(43),
+        'T4_square4': hex(44),
+        'T4_square5': hex(45),
+        'T4_heat_pulse': hex(46),
+        'T4_PainRatingScale': hex(47),
+        'T4_ITI_Post': hex(48),
 
-        'T6_square1': hex(60),
-        'T6_square2': hex(61),
-        'T6_square3': hex(62),
-        'T6_square4': hex(63),
-        'T6_square5': hex(64),
-        'T6_heat_pulse': hex(65),
-        'T6_PainRatingScale': hex(66),
+        'T6_ITI_Pre': hex(60),
+        'T6_square2': hex(62),
+        'T6_square3': hex(63),
+        'T6_square4': hex(64),
+        'T6_square5': hex(65),
+        'T6_heat_pulse': hex(66),
+        'T6_PainRatingScale': hex(67),
+        'T6_ITI_Post': hex(68),
 
-        'T8_square1': hex(80),
-        'T8_square2': hex(81),
-        'T8_square3': hex(82),
-        'T8_square4': hex(83),
-        'T8_square5': hex(84),
-        'T8_heat_pulse': hex(85),
-        'T8_PainRatingScale': hex(86),
+        'T8_ITI_Pre': hex(80),
+        'T8_square1': hex(81),
+        'T8_square2': hex(82),
+        'T8_square3': hex(83),
+        'T8_square4': hex(84),
+        'T8_square5': hex(85),
+        'T8_heat_pulse': hex(86),
+        'T8_PainRatingScale': hex(87),
+        'T8_ITI_Post': hex(88),
 
         'PreVas_rating': hex(90),
         'MidRun_rating': hex(91),
@@ -477,17 +484,9 @@ color_to_T_dict = {
 }
 
 
-def iti():
-    blank_wait = random.uniform(params['blankFixationMin'], params['blankFixationMax'])
+def iti_before_squares(temp: str):
+    report_event(temp, temp + "_ITI_Pre")
     cross_wait = random.uniform(params['crossFixationMin'], params['crossFixationMax'])
-    win.flip()
-    blank_start = ts.time()
-    while ts.time() < blank_start + blank_wait:
-        for ev in event.getKeys():
-            if ev.key in ["esc", "escape", "q"]:
-                win.close()
-                core.quit()
-
     img = visual.ImageStim(win, image="./img/PlusOnly.jpg", pos=(0, 0), size=(2, 2), units="norm")
     cross_start = ts.time()
     img.draw()
@@ -499,6 +498,18 @@ def iti():
                 core.quit()
 
     del img
+
+
+def iti_after_squares(temp: str):
+    report_event(temp, temp + "_ITI_Post")
+    blank_wait = random.uniform(params['blankFixationMin'], params['blankFixationMax'])
+    win.flip()
+    blank_start = ts.time()
+    while ts.time() < blank_start + blank_wait:
+        for ev in event.getKeys():
+            if ev.key in ["esc", "escape", "q"]:
+                win.close()
+                core.quit()
 
 
 # main function that takes information to run through each trial
@@ -966,6 +977,7 @@ for block in range(0, params['nBlocks']):
             write_to_csv(['block:' + str(block), 'trial:' + str(trial), 'color:' + str(color)], csv_file)
 
         # Calls the GrowingSquare function to present the stimulus, and records the start time and phase start time.
+        iti_before_squares(color_to_T_dict[color])
         trialStart, phaseStart = GrowingSquare(color, block, trial, params)
         win.flip()  # Flips the screen and waits for 2 seconds.
         core.wait(2)
@@ -977,7 +989,7 @@ for block in range(0, params['nBlocks']):
         rating = RatingScales.run_vas(win, io, params, "PainRating", params['questionDur'])
         # rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
         # WaitForFlipTime()
-        iti()
+        iti_after_squares(color_to_T_dict[color])
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
 
         # Save new data to the DF:
