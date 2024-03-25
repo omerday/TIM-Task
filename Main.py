@@ -161,7 +161,7 @@ def createPrintLogFile():
     df2.to_csv('logPrints%s.csv' % expInfo['subject'])
 
 
-INSTRUCTIONS_SLIDES = 32
+INSTRUCTIONS_SLIDES = 28
 
 # Declare primary task parameters.
 params = {
@@ -508,17 +508,17 @@ def GrowingSquare(color, block, trial, params):
 
     # set color of square
     if color == 1:
-        col = 'white'
+        col = 'green'
         colCode = int('FFFFFF', 16)
-        colorName = 'White'
-    if color == 2:
+        colorName = 'Green'
+    elif color == 2:
         col = 'darkseagreen'
         colCode = int('8fbc8f', 16)
         colorName = 'Yellow'
     elif color == 3:
         col = 'khaki'
         colCode = int('FFFF00', 16)  # colCode = int('F0E68C', 16)
-        colorName = 'Orange'
+        colorName = 'Yellow'
     elif color == 4:
         col = 'lightcoral'
         colCode = int('D21404', 16)  # colCode = int('F08080', 16)
@@ -973,9 +973,9 @@ for block in range(0, params['nBlocks']):
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
         painITI += 1
+        report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         rating = RatingScales.run_vas(win, io, params, "PainRating", params['questionDur'])
         # rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
-        report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         # WaitForFlipTime()
         iti()
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
