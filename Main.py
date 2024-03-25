@@ -20,15 +20,13 @@ import BasicPromptTools  # for loading/presenting prompts and questions
 import HelperFunctions
 import RatingScales
 from HelperFunctions import reverse_string
-#from devices import Pathway
+# from devices import Pathway
 from time import time, sleep
 from Medoc_control_new import Pathway
 import serial
 import serial.tools.list_ports as list_ports
 from psychopy.iohub import launchHubServer
 from time import strftime, localtime
-
-
 
 # from psychopy import visual # visual causes a bug in the guis, so it's declared after all GUIs run.
 
@@ -38,7 +36,6 @@ from time import strftime, localtime
 # Save the parameters declared below?
 
 PAIN_RATING_CSV_HEADERS = ['Block', 'Trial', 'Color', 'Pain']
-
 
 """
 This function will take event's that happen on psychopy
@@ -68,6 +65,8 @@ fixation: 95
 """
 
 print("bef report_event")
+
+
 # temp - T2/T4/T6/T8
 # event_type - square1/square2/square3/square4/square5/heat_pulse/rating/fixation
 def report_event(temp, event_type):
@@ -134,6 +133,7 @@ def report_event(temp, event_type):
 
     return events[event_type]
 
+
 def createPrintLogFile():
     logging.flush()
     with open(filename + '.log', "r", encoding='ascii', errors='ignore') as file:
@@ -159,6 +159,7 @@ def createPrintLogFile():
 
     df2 = pd.DataFrame(items, columns=['Time', 'Level', 'msg'])
     df2.to_csv('logPrints%s.csv' % expInfo['subject'])
+
 
 INSTRUCTIONS_SLIDES = 32
 
@@ -201,9 +202,13 @@ params = {
     'codeFixation': 143,  # parallel port code for fixation period - safe
     'codeReady': 145,  # parallel port code for Get ready stimulus
     'codeVAS': 142,  # parallel port code for 3 VASs
-    'squareDurationMin': 4, # minimum duration for each square
-    'squareDurationMax': 7, # maximum duration for each square
-    'painRateDuration': 7, # pain rating duration
+    'squareDurationMin': 4,  # minimum duration for each square
+    'squareDurationMax': 7,  # maximum duration for each square
+    'blankFixationMin': 4,
+    'blankFixationMax': 6,
+    'crossFixationMin': 4,
+    'crossFixationMax': 6,
+    'painRateDuration': 7,  # pain rating duration
     'convExcel': 'tempConv.xlsx',  # excel file with temp to binary code mappings
     # 'image1': 'img/image1.png',
     # 'image2': 'img/image2.png',
@@ -222,14 +227,22 @@ try:  # try to get a previous parameters file
     expInfo['session'] = 1  # automatically increment session number
     expInfo['Gender'] = ["female", "male"]
     expInfo['Language'] = ["Hebrew", "English"]
-    expInfo['T2'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
-                     "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
-    expInfo['T4'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
-                     "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
-    expInfo['T6'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
-                     "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
-    expInfo['T8'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
-                     "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
+    expInfo['T2'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
+                     "40.0", "40.5", "41.0", "41.5",
+                     "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
+                     "48.0", "48.5", "49.0", "49.5", "50.0"]
+    expInfo['T4'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
+                     "40.0", "40.5", "41.0", "41.5",
+                     "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
+                     "48.0", "48.5", "49.0", "49.5", "50.0"]
+    expInfo['T6'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
+                     "40.0", "40.5", "41.0", "41.5",
+                     "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
+                     "48.0", "48.5", "49.0", "49.5", "50.0"]
+    expInfo['T8'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
+                     "40.0", "40.5", "41.0", "41.5",
+                     "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
+                     "48.0", "48.5", "49.0", "49.5", "50.0"]
     expInfo['Pain Support'] = True
     expInfo['Skip Instructions'] = False
     expInfo['Continuous Shape'] = True
@@ -250,7 +263,9 @@ except:  # if not there then use a default set
     }
 
 # present a dialogue to change select params
-dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'Gender', 'Language', 'T2', 'T4', 'T6', 'T8', 'Pain Support','Skip Instructions', 'Continuous Shape'])
+dlg = gui.DlgFromDict(expInfo, title=scriptName,
+                      order=['subject', 'session', 'Gender', 'Language', 'T2', 'T4', 'T6', 'T8', 'Pain Support',
+                             'Skip Instructions', 'Continuous Shape'])
 if not dlg.OK:
     core.quit()  # the user hit cancel, so exit
 
@@ -259,7 +274,8 @@ params['skipInstructions'] = expInfo['Skip Instructions']
 params['language'] = expInfo['Language']
 params['continuousShape'] = expInfo['Continuous Shape']
 
-params['introPractice'] = f'Questions/{params["language"]}/PracticeRating.txt'  # Name of text file containing practice rating scales
+params[
+    'introPractice'] = f'Questions/{params["language"]}/PracticeRating.txt'  # Name of text file containing practice rating scales
 params['moodQuestionFile1'] = f'Questions/{params["language"]}/ERVas1RatingScales.txt'
 # Name of text file containing mood Q&As presented before run
 params['moodQuestionFile2'] = f'Questions/{params["language"]}/ERVasRatingScales.txt'
@@ -302,6 +318,7 @@ def write_to_csv(info_to_csv, name_csv_file):
     writer = csv.writer(name_csv_file)
     writer.writerow(info_to_csv)
 
+
 params['instructionsFolder'] = './instructions/instructions'
 if params['language'] == 'English':
     params['instructionsSuffix'] = '_E'
@@ -323,7 +340,6 @@ if params['painSupport']:
     else:
         print("Parallel port not used.")
 
-
 if params['painSupport']:
     # ip and port number from medoc application
     my_pathway = Pathway(ip='10.0.0.11', port_number=20121)
@@ -334,7 +350,6 @@ if params['painSupport']:
     response = my_pathway.sendCommand(0)
     print("send command status was sent")
     print(response)
-
 
 # ========================== #
 # ===== SET UP STIMULI ===== #
@@ -380,7 +395,8 @@ print('%d questions loaded from %s' % (len(questions), params['questionFile']))
 promptImage = 'TIMprompt2.jpg'
 stimImage = visual.ImageStim(win, pos=[0, 0], name='ImageStimulus', image=promptImage, units='pix')
 
-color_list = [1, 2, 3, 4, 1, 2, 3, 4]  # 1-white, 2-green, 3-yellow, 4-red, ensure each color is presented twice at random per block
+color_list = [1, 2, 3, 4, 1, 2, 3,
+              4]  # 1-white, 2-green, 3-yellow, 4-red, ensure each color is presented twice at random per block
 random.shuffle(color_list)
 
 sleepRand = [0, 0.5, 1, 1.5, 2]  # slightly vary onset of heat pain
@@ -451,15 +467,16 @@ def WaitForFlipTime():
 
 
 color_to_T_dict = {
-            1: 'T2',
-            2: 'T4',
-            3: 'T6',
-            4: 'T8'
-        }
+    1: 'T2',
+    2: 'T4',
+    3: 'T6',
+    4: 'T8'
+}
+
 
 def iti():
-    blank_wait = random.uniform(3, 4)
-    cross_wait = random.uniform(3, 5)
+    blank_wait = random.uniform(params['blankFixationMin'], params['blankFixationMax'])
+    cross_wait = random.uniform(params['crossFixationMin'], params['crossFixationMax'])
     win.flip()
     blank_start = ts.time()
     while ts.time() < blank_start + blank_wait:
@@ -468,7 +485,7 @@ def iti():
                 win.close()
                 core.quit()
 
-    img = visual.ImageStim(win, image="./img/PlusOnly.jpg", pos=(0, 0), size=(2,2), units="norm")
+    img = visual.ImageStim(win, image="./img/PlusOnly.jpg", pos=(0, 0), size=(2, 2), units="norm")
     cross_start = ts.time()
     img.draw()
     win.flip()
@@ -479,7 +496,6 @@ def iti():
                 core.quit()
 
     del img
-
 
 
 # main function that takes information to run through each trial
@@ -498,11 +514,11 @@ def GrowingSquare(color, block, trial, params):
         colorName = 'Yellow'
     elif color == 3:
         col = 'khaki'
-        colCode = int('FFFF00', 16)     #colCode = int('F0E68C', 16)
+        colCode = int('FFFF00', 16)  # colCode = int('F0E68C', 16)
         colorName = 'Orange'
     elif color == 4:
         col = 'lightcoral'
-        colCode = int('D21404', 16)     #colCode = int('F08080', 16)
+        colCode = int('D21404', 16)  # colCode = int('F08080', 16)
         colorName = 'Red'
     else:
         col = 'white'
@@ -515,14 +531,14 @@ def GrowingSquare(color, block, trial, params):
     # Load pre-defined images of square at different sizes
     squareImages = []
     for i in range(1, 6):
-        squareImages.append(visual.ImageStim(win, image=f"squares/{color}{colorName}_{i}.jpeg", pos=(0, 0), size=(2,2), units="norm"))
+        squareImages.append(
+            visual.ImageStim(win, image=f"squares/{color}{colorName}_{i}.jpeg", pos=(0, 0), size=(2, 2), units="norm"))
 
     # # adjusting squares to fit a 24-inch screen
     # for i in range(len(squareImages) - 1):
     #     squareImages[i].size = (squareImages[i].size[0] * 1.5, squareImages[i].size[1] * 1.4)
     # # make last square cover the entire screen
     # squareImages[len(squareImages) - 1].size *= 2
-
 
     WaitForFlipTime()
     # gray color = during the instructions
@@ -532,12 +548,12 @@ def GrowingSquare(color, block, trial, params):
 
     for i in range(1, 6):
         # Set size of rating scale marker based on current square size
-        sizeRatio = squareImages[i-1].size[0] / squareImages[0].size[0]
+        sizeRatio = squareImages[i - 1].size[0] / squareImages[0].size[0]
 
-        curr_image = squareImages[i-1]
+        curr_image = squareImages[i - 1]
         curr_image.draw()
         win.flip()
-        print("color " + str(color) + 'i: '+str(i-1))
+        print("color " + str(color) + 'i: ' + str(i - 1))
         # send event to biopac
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_square' + str(i))
 
@@ -624,13 +640,13 @@ def GrowingSquare(color, block, trial, params):
             print("Stopping")
             response = my_pathway.sendCommand('STOP')
             core.wait(2)
-            #response = my_pathway.sendCommand('STOP')
+            # response = my_pathway.sendCommand('STOP')
             stat = my_pathway.sendCommand('GET_STATUS').teststatestr
-            while(stat != "IDLE"):
+            while (stat != "IDLE"):
                 core.wait(0.5)
                 stat = my_pathway.sendCommand('GET_STATUS').teststatestr
                 print(f"Get status result = {stat}")
-            
+
         # Flush the key buffer and mouse movements
         event.clearEvents()
 
@@ -680,26 +696,27 @@ def SetPort(color, size, block, csv_writer):
             # Trigger the device to start the heat pulse
             # my_pathway.trigger()
 
+
 # Handle end of a session
 
 
 def RunVas(questions, options, io, pos=(0., -0.25), scaleTextPos=[0., 0.25], questionDur=params['questionDur'],
            isEndedByKeypress=params['questionSelectAdvances'], name='Vas'):
-
     # wait until it's time
     WaitForFlipTime()
 
     # Show questions and options
     rating, decisionTime, choiceHistory, score = RatingScales.ShowVAS(questions, options, win, questionDur=questionDur, \
-                                                                 upKey=params['questionUpKey'],
-                                                                 downKey=params['questionDownKey'],
-                                                                 selectKey=params['questionSelectKey'],
-                                                                 isEndedByKeypress=isEndedByKeypress,
-                                                                 textColor=params['vasTextColor'], name=name, pos=pos,
-                                                                 scaleTextPos=scaleTextPos,
-                                                                 labelYPos=pos[1] - params['vasLabelYDist'],
-                                                                 markerSize=params['vasMarkerSize'],
-                                                                 tickHeight=1, tickLabelWidth=0.9, io=io)
+                                                                      upKey=params['questionUpKey'],
+                                                                      downKey=params['questionDownKey'],
+                                                                      selectKey=params['questionSelectKey'],
+                                                                      isEndedByKeypress=isEndedByKeypress,
+                                                                      textColor=params['vasTextColor'], name=name,
+                                                                      pos=pos,
+                                                                      scaleTextPos=scaleTextPos,
+                                                                      labelYPos=pos[1] - params['vasLabelYDist'],
+                                                                      markerSize=params['vasMarkerSize'],
+                                                                      tickHeight=1, tickLabelWidth=0.9, io=io)
 
     # write data to CSV file
     csv_writer.writerow([globalClock.getTime(), 'VASRatingScale ' + name + ': (key response) rating=' + str(rating),
@@ -723,11 +740,15 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
     # display pre-VAS prompt
     if not params['skipPrompts']:
         if expInfo['gender'] == 'female':
-            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחצי על כל מקש כדי להמשיך")] if params['language'] == 'Hebrew' else ["Press any key to continue"], win, message1,
-                                    message2)
+            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחצי על כל מקש כדי להמשיך")] if params[
+                                                                                                                    'language'] == 'Hebrew' else [
+                "Press any key to continue"], win, message1,
+                                        message2)
         else:
-            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחץ על כל מקש כדי להמשיך")] if params['language'] == 'Hebrew' else ["Press any key to continue"], win, message1,
-                                    message2)
+            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחץ על כל מקש כדי להמשיך")] if params[
+                                                                                                                   'language'] == 'Hebrew' else [
+                "Press any key to continue"], win, message1,
+                                        message2)
 
     # Display this VAS
     for i in range(len(questions)):
@@ -737,10 +758,11 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
         imgName = imgName.replace('?', '')
         imgName = imgName.replace('\n', '')
         if name == 'PainRatingScale':
-            score = RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name, io=io)
+            score = RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name,
+                           io=io)
         else:
             score = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name, io=io)
-        
+
         # VAS_history = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
         # csv_writer.writerow([globalClock.getTime(), 'VASRatingScale ' + name + ': choiceHistory=' + str(VAS_history)])
 
@@ -817,7 +839,7 @@ def BetweenBlock(params):
     #
     thisKey = event.waitKeys(keyList=['space'])  # use space bar to avoid accidental advancing
     if thisKey:
-       tNextFlip[0] = globalClock.getTime() + 2.0
+        tNextFlip[0] = globalClock.getTime() + 2.0
 
 
 def BehavFile(absTime, block, trial, color, trialTime, phase, phaseTime):
@@ -851,7 +873,9 @@ for block in range(0, params['nBlocks']):
         while again:
             again = False
             if params['skipInstructions'] == False:
-                image = visual.ImageStim(win, image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg", pos=(0, 0), units='pix', size=screenRes)
+                image = visual.ImageStim(win,
+                                         image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg",
+                                         pos=(0, 0), units='pix', size=screenRes)
                 image.draw()
                 win.flip()
                 HelperFunctions.wait_for_space(win, io)
@@ -962,7 +986,8 @@ for block in range(0, params['nBlocks']):
 
         if not os.path.exists("./data"):
             os.mkdir("data")
-        pain_rating_df.to_csv(f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings - {strftime('%Y-%m-%d %H-%M', localtime(params['startTime']))}.csv")
+        pain_rating_df.to_csv(
+            f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings - {strftime('%Y-%m-%d %H-%M', localtime(params['startTime']))}.csv")
 
     ### THE FIXATION "SAFE" AND "GET READY" WAS DELETED FROM HERE ###
 
