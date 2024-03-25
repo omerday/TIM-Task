@@ -266,7 +266,7 @@ except:  # if not there then use a default set
 
 # present a dialogue to change select params
 dlg = gui.DlgFromDict(expInfo, title=scriptName,
-                      order=['subject', 'session', 'Gender', 'Language', 'T2', 'T4', 'T6', 'T8', 'Pain Support',
+                      order=['subject', 'session', 'Gender', 'Language', 'T2', 'T6', 'T8', 'Pain Support',
                              'Skip Instructions', 'Continuous Shape'])
 if not dlg.OK:
     core.quit()  # the user hit cancel, so exit
