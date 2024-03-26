@@ -485,6 +485,7 @@ color_to_T_dict = {
 
 
 def iti_before_squares(temp: str):
+    keyboard = io.devices.keyboard
     report_event(temp, temp + "_ITI_Pre")
     cross_wait = random.uniform(params['crossFixationMin'], params['crossFixationMax'])
     img = visual.ImageStim(win, image="./img/PlusOnly.jpg", pos=(0, 0), size=(2, 2), units="norm")
@@ -492,7 +493,7 @@ def iti_before_squares(temp: str):
     img.draw()
     win.flip()
     while ts.time() < cross_start + cross_wait:
-        for ev in event.getKeys():
+        for ev in keyboard.getKeys():
             if ev.key in ["esc", "escape", "q"]:
                 win.close()
                 core.quit()
@@ -501,12 +502,13 @@ def iti_before_squares(temp: str):
 
 
 def iti_after_squares(temp: str):
+    keyboard = io.devices.keyboard
     report_event(temp, temp + "_ITI_Post")
     blank_wait = random.uniform(params['blankFixationMin'], params['blankFixationMax'])
     win.flip()
     blank_start = ts.time()
     while ts.time() < blank_start + blank_wait:
-        for ev in event.getKeys():
+        for ev in keyboard.getKeys():
             if ev.key in ["esc", "escape", "q"]:
                 win.close()
                 core.quit()
