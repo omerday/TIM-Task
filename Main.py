@@ -94,6 +94,7 @@ def report_event(temp, event_type):
         'T4_ITI_Post': hex(48),
 
         'T6_ITI_Pre': hex(60),
+        'T6_square1': hex(61),
         'T6_square2': hex(62),
         'T6_square3': hex(63),
         'T6_square4': hex(64),
