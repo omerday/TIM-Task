@@ -211,8 +211,8 @@ params = {
     'codeVAS': 142,  # parallel port code for 3 VASs
     'squareDurationMin': 4,  # minimum duration for each square
     'squareDurationMax': 7,  # maximum duration for each square
-    'blankFixationMin': 4,
-    'blankFixationMax': 6,
+    'blankFixationMin': 7,
+    'blankFixationMax': 9,
     'crossFixationMin': 4,
     'crossFixationMax': 6,
     'painRateDuration': 7,  # pain rating duration
@@ -531,7 +531,7 @@ def GrowingSquare(color, block, trial, params):
     elif color == 3:
         col = 'khaki'
         colCode = int('FFFF00', 16)  # colCode = int('F0E68C', 16)
-        colorName = 'Yellow'
+        colorName = 'Orange'
     elif color == 4:
         col = 'lightcoral'
         colCode = int('D21404', 16)  # colCode = int('F08080', 16)
@@ -582,11 +582,12 @@ def GrowingSquare(color, block, trial, params):
         if params['continuousShape'] or i == 5:
             core.wait(square_duration)
         else:
-            core.wait(random.uniform(1.5, 2))
+            square_present = random.uniform(2, 2.5)
+            core.wait(square_present)
             curr_image.image = "squares/blank.jpg"
             curr_image.draw()
             win.flip()
-            core.wait(square_duration - 1)
+            core.wait(square_duration - square_present)
 
         # get new keys
         newKeys = event.getKeys(keyList=['q', 'escape'], timeStamped=globalClock)
@@ -983,7 +984,7 @@ for block in range(0, params['nBlocks']):
         iti_before_squares(color_to_T_dict[color])
         trialStart, phaseStart = GrowingSquare(color, block, trial, params)
         win.flip()  # Flips the screen and waits for 2 seconds.
-        core.wait(2)
+        core.wait(3)
 
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
