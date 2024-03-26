@@ -557,7 +557,7 @@ def GrowingSquare(color, block, trial, params):
     # # make last square cover the entire screen
     # squareImages[len(squareImages) - 1].size *= 2
 
-    WaitForFlipTime()
+    # WaitForFlipTime()
     # gray color = during the instructions
     if col != 'gray':
         SetPort(color, 1, block, csv_writer)
