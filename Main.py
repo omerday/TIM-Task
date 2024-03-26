@@ -488,7 +488,7 @@ def iti_before_squares(temp: str):
     keyboard = io.devices.keyboard
     report_event(temp, temp + "_ITI_Pre")
     cross_wait = random.uniform(params['crossFixationMin'], params['crossFixationMax'])
-    img = visual.ImageStim(win, image="./img/PlusOnly.jpg", pos=(0, 0), size=(2, 2), units="norm")
+    img = visual.ImageStim(win, image="./img/plus.jpeg", pos=(0, 0), size=(2, 2), units="norm")
     cross_start = ts.time()
     img.draw()
     win.flip()
@@ -940,12 +940,13 @@ for block in range(0, params['nBlocks']):
         # if thisKey:
         #     tNextFlip[0] = globalClock.getTime() + random.randint(4, 6)
 
+    # Omer - Remove excess cross
     # wait before first stimulus
-    fixationCross.draw()
-    win.logOnFlip(level=logging.EXP, msg='Display Fixation')
-    win.flip()  # Flip the window to display the fixation cross
-    core.wait(1)  # Change to that: random.randint(4, 6)
-    report_event('Fixation', 'Fixation_cross')
+    # fixationCross.draw()
+    # win.logOnFlip(level=logging.EXP, msg='Display Fixation')
+    # win.flip()  # Flip the window to display the fixation cross
+    # core.wait(1)  # Change to that: random.randint(4, 6)
+    # report_event('Fixation', 'Fixation_cross')
 
     # wait until it's time to show screen
     WaitForFlipTime()
