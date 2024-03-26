@@ -842,10 +842,10 @@ def BetweenBlock(params):
     # COMMENTED OUT NEED TO PRESS SPACE BEFORE PROCEEDING TO NEXT SLIDE
     if params['language'] == 'Hebrew':
         message1.setText(reverse_string("הסתיים הבלוק הנוכחי"))
-        message2.setText(reverse_string("לחץ על מקש הרווח כדי להתקדם"))
+        message2.setText(reverse_string("אנא המתן להוראות הנסיין"))
     else:
         message1.setText("The current block has ended")
-        message2.setText("Press the spacebar to proceed")
+        message2.setText("Please wait for the Experimenter's Instructions")
     win.logOnFlip(level=logging.EXP, msg='BetweenBlock')
     #
     message1.setFont('Arial Hebrew')
