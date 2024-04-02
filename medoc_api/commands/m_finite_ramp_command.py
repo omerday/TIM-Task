@@ -1,4 +1,4 @@
-from commands.m_temperature_command import *
+from medoc_api.commands.m_temperature_command import *
 
 
 class finite_ramp_command(temperature_command):
