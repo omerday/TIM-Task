@@ -1,4 +1,4 @@
-from commands.m_command import command
+from medoc_api.commands.m_command import command
 
 
 class temperature_command(command):

@@ -1,5 +1,5 @@
 import unittest
-from Utilities import converters, temp_converter
+from medoc_api.Utilities import converters, temp_converter
 
 
 class converterTestCase(unittest.TestCase):
