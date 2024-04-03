@@ -40,7 +40,7 @@ class TsaDevice:
     events from a patient response device.
     """
 
-    def __init__(self, auto_connect_port=True, preferences_path="preferences.json") -> None:
+    def __init__(self, auto_connect_port=True, preferences_path="./medoc_api/preferences.json") -> None:
         self.token_holder: TokenHolder = TokenHolder()
 
         if auto_connect_port and sys.platform != "win32" and not "linux" in sys.platform:
