@@ -319,7 +319,7 @@ else:
 device = None
 if params['painSupport']:
     device = TsaDevice(auto_connect_port=True)
-    device.event_patient_response.connect('y')
+    # device.event_patient_response.connect('y')
     print("Connecting")
     device.start_status_thread(0.1)
     print("Initializing and Self-Test")
@@ -470,23 +470,23 @@ def GrowingSquare(color, block, trial, params):
     if color == 1:
         col = 'white'
         colorName = 'White'
-        temp = expInfo['T2']
+        temp = float(expInfo['T2'])
     if color == 2:
         col = 'yellow'
         colorName = 'Yellow'
-        temp = expInfo['T4']
+        temp = float(expInfo['T4'])
     elif color == 3:
         col = 'orange'
         colorName = 'Orange'
-        temp = expInfo['T6']
+        temp = float(expInfo['T6'])
     elif color == 4:
         col = 'red'
         colorName = 'Red'
-        temp = expInfo['T8']
+        temp = float(expInfo['T8'])
     else:
         col = 'white'
         colorName = 'White'
-        temp = expInfo['T2']
+        temp = float(expInfo['T2'])
 
     trialStart = globalClock.getTime()
     phaseStart = globalClock.getTime()
