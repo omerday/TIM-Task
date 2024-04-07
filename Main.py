@@ -323,8 +323,8 @@ if params['painSupport']:
     print("Connecting")
     device.start_status_thread(0.1)
     print("Initializing and Self-Test")
-    device.enable_thermode(enums.ThermodeType.CHEPS)
-    device.set_active_thermode(enums.ThermodeType.CHEPS)
+    device.enable_thermode(enums.ThermodeType.DCHEPS)
+    device.set_active_thermode(enums.ThermodeType.DCHEPS)
 
     set_rest_mode_res = device.set_tcu_state(enums.SystemState.RestMode, run_self_test=True, wait_for_state=True)
     i = 0
@@ -574,49 +574,53 @@ def GrowingSquare(color, block, trial, params):
         if params['painSupport']:
             report_event(color_to_T_dict[color], color_to_T_dict[color] + '_heat_pulse')
             print("Starting heat raise")
+            print(f"State before Heat Increase = {device.status_state}")
+            print(f"Temp before Heat Increase = {device.status_temp}")
             device.finite_ramp_by_temperature(temp, 0.1, 0.1, is_stop_on_response_unit_yes=False, time=1000)
-            print(f"State before run_test = {device.status_state}")
-            print(f"Temp before run_test = {device.status_temp}")
+            print(f"State after Heat Increase = {device.status_state}")
+            print(f"Temp after Heat Increase = {device.status_temp}")
             device.run_test()
             temp_start_time = time.time()
             while time.time() < temp_start_time + 1:
                 for curr_event in event.getKeys():
                     if curr_event == 'escape':
                         device.stop_test()
-                        win.close()
-                        core.quit()
+                        CoolDown()
                 core.wait(0.05)
             device.stop_test()
 
             print("Staying for 4 sec")
+            print(f"State before Heat Command = {device.status_state}")
+            print(f"Temp before Heat Command = {device.status_temp}")
             device.finite_ramp_by_temperature(temp, 0.1, 0.1, is_stop_on_response_unit_yes=False, time=4000)
-            print(f"State before run_test = {device.status_state}")
-            print(f"Temp before run_test = {device.status_temp}")
             device.run_test()
             temp_start_time = time.time()
-            while time.time() < temp_start_time + 1:
+            while time.time() < temp_start_time + 4:
                 for curr_event in event.getKeys():
                     if curr_event == 'escape':
                         device.stop_test()
-                        win.close()
-                        core.quit()
+                        CoolDown()
                 core.wait(0.05)
             device.stop_test()
+            print(f"State After Heat Command = {device.status_state}")
+            print(f"Temp After Heat Command = {device.status_temp}")
 
             print("lowering to baseline")
-            device.finite_ramp_by_temperature(32, 0.1, 0.1, is_stop_on_response_unit_yes=False, time=1500)
-            print(f"State before run_test = {device.status_state}")
-            print(f"Temp before run_test = {device.status_temp}")
+            device.finite_ramp_by_temperature(32, 0.1, 0.1, is_stop_on_response_unit_yes=False, time=1000)
+            print(f"State before Return to Baseline = {device.status_state}")
+            print(f"Temp before Return to Baseline = {device.status_temp}")
             device.run_test()
             temp_start_time = time.time()
-            while time.time() < temp_start_time + 1:
+            while time.time() < temp_start_time + 1.1:
                 for curr_event in event.getKeys():
                     if curr_event == 'escape':
                         device.stop_test()
-                        win.close()
-                        core.quit()
+                        CoolDown()
                 core.wait(0.05)
+            print(f"State after Return to Baseline = {device.status_state}")
+            print(f"Temp after Return to Baseline = {device.status_temp}")
             device.stop_test()
+
         # Flush the key buffer and mouse movements
         event.clearEvents()
 
@@ -721,6 +725,9 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
 
 def CoolDown():
     # Stop drawing ratingScale (if it exists)
+    device.end_test()
+    device.stop_status_thread()
+    device.finalize()
     try:
         fixationCross.autoDraw = False
     except:
