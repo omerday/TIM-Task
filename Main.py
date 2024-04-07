@@ -323,8 +323,8 @@ if params['painSupport']:
     print("Connecting")
     device.start_status_thread(0.1)
     print("Initializing and Self-Test")
-    device.enable_thermode(enums.ThermodeType.TSA)
-    device.set_active_thermode(enums.ThermodeType.TSA)
+    device.enable_thermode(enums.ThermodeType.CHEPS)
+    device.set_active_thermode(enums.ThermodeType.CHEPS)
 
     set_rest_mode_res = device.set_tcu_state(enums.SystemState.RestMode, run_self_test=True, wait_for_state=True)
     i = 0
