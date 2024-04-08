@@ -20,7 +20,7 @@ import BasicPromptTools  # for loading/presenting prompts and questions
 import HelperFunctions
 import RatingScales
 from HelperFunctions import reverse_string
-#from devices import Pathway
+# from devices import Pathway
 from time import time, sleep
 from Medoc_control_new import Pathway
 import serial
@@ -30,8 +30,6 @@ from time import strftime, localtime
 from medoc_api.tsa_device import TsaDevice
 from medoc_api import enums
 
-
-
 # from psychopy import visual # visual causes a bug in the guis, so it's declared after all GUIs run.
 
 # ====================== #
@@ -40,7 +38,6 @@ from medoc_api import enums
 # Save the parameters declared below?
 
 PAIN_RATING_CSV_HEADERS = ['Block', 'Trial', 'Color', 'Pain']
-
 
 """
 This function will take event's that happen on psychopy
@@ -162,15 +159,16 @@ def createPrintLogFile():
     df2 = pd.DataFrame(items, columns=['Time', 'Level', 'msg'])
     df2.to_csv('logPrints%s.csv' % expInfo['subject'])
 
-INSTRUCTIONS_SLIDES = 32
+
+INSTRUCTIONS_SLIDES = 28
 
 # Declare primary task parameters.
 params = {
     # Declare stimulus and response parameters
     'startTime': ts.time(),
     'screenIdx': 0,
-    'nTrials': 8,  # number of squares in each block
-    'nBlocks': 5,  # number of blocks (aka runs) - need time to move electrode in between
+    'nTrials': 6,  # number of squares in each block
+    'nBlocks': 6,  # number of blocks (aka runs) - need time to move electrode in between
     'painDur': 4,  # time of heat sensation (in seconds)
     'tStartup': 5,  # pause time before starting first stimulus
     # declare prompt and question files
@@ -203,9 +201,13 @@ params = {
     'codeFixation': 143,  # parallel port code for fixation period - safe
     'codeReady': 145,  # parallel port code for Get ready stimulus
     'codeVAS': 142,  # parallel port code for 3 VASs
-    'squareDurationMin': 4, # minimum duration for each square
-    'squareDurationMax': 7, # maximum duration for each square
-    'painRateDuration': 7, # pain rating duration
+    'squareDurationMin': 4,  # minimum duration for each square
+    'squareDurationMax': 7,  # maximum duration for each square
+    'blankFixationMin': 7,
+    'blankFixationMax': 9,
+    'crossFixationMin': 4,
+    'crossFixationMax': 6,
+    'painRateDuration': 7,  # pain rating duration
     'convExcel': 'tempConv.xlsx',  # excel file with temp to binary code mappings
     # 'image1': 'img/image1.png',
     # 'image2': 'img/image2.png',
@@ -224,14 +226,23 @@ try:  # try to get a previous parameters file
     expInfo['session'] = 1  # automatically increment session number
     expInfo['Gender'] = ["female", "male"]
     expInfo['Language'] = ["Hebrew", "English"]
-    expInfo['T2'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
-                     "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
-    expInfo['T4'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
-                     "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
-    expInfo['T6'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
-                     "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
-    expInfo['T8'] = ["34.0", "34.5", "35.0", "35.5","36.0", "36.5", "37.0", "37.5","38.0", "38.5", "39.0", "39.5","40.0", "40.5", "41.0", "41.5",
-                     "42.0", "42.5", "43.0", "43.5","44.0", "44.5", "45.0", "45.5","46.0", "46.5", "47.0", "47.5","48.0", "48.5", "49.0", "49.5", "50.0"]
+    expInfo['T2'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
+                     "40.0", "40.5", "41.0", "41.5",
+                     "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
+                     "48.0", "48.5", "49.0", "49.5", "50.0"]
+    # Omer - Removed T4 for the three-temperature version. Maybe find a more elegant way to do that?
+    # expInfo['T4'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
+    #                  "40.0", "40.5", "41.0", "41.5",
+    #                  "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
+    #                  "48.0", "48.5", "49.0", "49.5", "50.0"]
+    expInfo['T6'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
+                     "40.0", "40.5", "41.0", "41.5",
+                     "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
+                     "48.0", "48.5", "49.0", "49.5", "50.0"]
+    expInfo['T8'] = ["34.0", "34.5", "35.0", "35.5", "36.0", "36.5", "37.0", "37.5", "38.0", "38.5", "39.0", "39.5",
+                     "40.0", "40.5", "41.0", "41.5",
+                     "42.0", "42.5", "43.0", "43.5", "44.0", "44.5", "45.0", "45.5", "46.0", "46.5", "47.0", "47.5",
+                     "48.0", "48.5", "49.0", "49.5", "50.0"]
     expInfo['Pain Support'] = True
     expInfo['Skip Instructions'] = False
     expInfo['Continuous Shape'] = True
@@ -243,7 +254,8 @@ except:  # if not there then use a default set
         'Gender': 'female',
         'Language': 'Hebrew',
         'T2': '36.0',
-        'T4': '41.0',
+        # Omer - T4 Removal for three-temperatures version
+        # 'T4': '41.0',
         'T6': '46.0',
         'T8': '50.0',
         'Pain Support': True,
@@ -252,7 +264,9 @@ except:  # if not there then use a default set
     }
 
 # present a dialogue to change select params
-dlg = gui.DlgFromDict(expInfo, title=scriptName, order=['subject', 'session', 'Gender', 'Language', 'T2', 'T4', 'T6', 'T8', 'Pain Support','Skip Instructions', 'Continuous Shape'])
+dlg = gui.DlgFromDict(expInfo, title=scriptName,
+                      order=['subject', 'session', 'Gender', 'Language', 'T2', 'T6', 'T8', 'Pain Support',
+                             'Skip Instructions', 'Continuous Shape'])
 if not dlg.OK:
     core.quit()  # the user hit cancel, so exit
 
@@ -283,7 +297,8 @@ logging.log(level=logging.INFO, msg='filename: %s' % filename)
 logging.log(level=logging.INFO, msg='subject: %s' % expInfo['subject'])
 logging.log(level=logging.INFO, msg='session: %s' % expInfo['session'])
 logging.log(level=logging.INFO, msg='T2: %s' % expInfo['T2'])
-logging.log(level=logging.INFO, msg='T4: %s' % expInfo['T4'])
+# Omer - Removed T4
+# logging.log(level=logging.INFO, msg='T4: %s' % expInfo['T4'])
 logging.log(level=logging.INFO, msg='T6: %s' % expInfo['T6'])
 logging.log(level=logging.INFO, msg='T8: %s' % expInfo['T8'])
 logging.log(level=logging.INFO, msg='date: %s' % dateStr)
@@ -303,6 +318,7 @@ csv_writer = csv.writer(csv_file, delimiter=',')
 def write_to_csv(info_to_csv, name_csv_file):
     writer = csv.writer(name_csv_file)
     writer.writerow(info_to_csv)
+
 
 params['instructionsFolder'] = './instructions/instructions'
 if params['language'] == 'English':
@@ -383,7 +399,8 @@ print('%d questions loaded from %s' % (len(questions), params['questionFile']))
 promptImage = 'TIMprompt2.jpg'
 stimImage = visual.ImageStim(win, pos=[0, 0], name='ImageStimulus', image=promptImage, units='pix')
 
-color_list = [1, 2, 3, 4, 1, 2, 3, 4]  # 1-white, 2-green, 3-yellow, 4-red, ensure each color is presented twice at random per block
+# Omer - Removed 2 from the list so we won't get a yellow square
+color_list = [1, 3, 4, 1, 3, 4]  # 1-white, 2-green, 3-yellow, 4-red, ensure each color is presented twice at random per block
 random.shuffle(color_list)
 
 sleepRand = [0, 0.5, 1, 1.5, 2]  # slightly vary onset of heat pain
@@ -454,11 +471,41 @@ def WaitForFlipTime():
 
 
 color_to_T_dict = {
-            1: 'T2',
-            2: 'T4',
-            3: 'T6',
-            4: 'T8'
-        }
+    1: 'T2',
+    2: 'T4',
+    3: 'T6',
+    4: 'T8'
+}
+
+
+def iti_before_squares(temp: str):
+    keyboard = io.devices.keyboard
+    report_event(temp, temp + "_ITI_Pre")
+    cross_wait = random.uniform(params['crossFixationMin'], params['crossFixationMax'])
+    img = visual.ImageStim(win, image="./img/plus.jpeg", pos=(0, 0), size=(2, 2), units="norm")
+    cross_start = ts.time()
+    img.draw()
+    win.flip()
+    while ts.time() < cross_start + cross_wait:
+        for ev in keyboard.getKeys():
+            if ev.key in ["esc", "escape", "q"]:
+                win.close()
+                core.quit()
+
+    del img
+
+
+def iti_after_squares(temp: str):
+    keyboard = io.devices.keyboard
+    report_event(temp, temp + "_ITI_Post")
+    blank_wait = random.uniform(params['blankFixationMin'], params['blankFixationMax'])
+    win.flip()
+    blank_start = ts.time()
+    while ts.time() < blank_start + blank_wait:
+        for ev in keyboard.getKeys():
+            if ev.key in ["esc", "escape", "q"]:
+                win.close()
+                core.quit()
 
 
 # main function that takes information to run through each trial
@@ -468,11 +515,11 @@ def GrowingSquare(color, block, trial, params):
 
     # set color of square
     if color == 1:
-        col = 'white'
-        colorName = 'White'
+        col = 'green'
+        colorName = 'Green'
         temp = float(expInfo['T2'])
-    if color == 2:
-        col = 'yellow'
+    elif color == 2:
+        col = 'darkseagreen'
         colorName = 'Yellow'
         temp = float(expInfo['T4'])
     elif color == 3:
@@ -494,14 +541,14 @@ def GrowingSquare(color, block, trial, params):
     # Load pre-defined images of square at different sizes
     squareImages = []
     for i in range(1, 6):
-        squareImages.append(visual.ImageStim(win, image=f"squares/{color}{colorName}_{i}.jpeg", pos=(0, 0), size=(2,2), units="norm"))
+        squareImages.append(
+            visual.ImageStim(win, image=f"squares/{color}{colorName}_{i}.jpeg", pos=(0, 0), size=(2, 2), units="norm"))
 
     # # adjusting squares to fit a 24-inch screen
     # for i in range(len(squareImages) - 1):
     #     squareImages[i].size = (squareImages[i].size[0] * 1.5, squareImages[i].size[1] * 1.4)
     # # make last square cover the entire screen
     # squareImages[len(squareImages) - 1].size *= 2
-
 
     WaitForFlipTime()
     # gray color = during the instructions
@@ -511,12 +558,12 @@ def GrowingSquare(color, block, trial, params):
 
     for i in range(1, 6):
         # Set size of rating scale marker based on current square size
-        sizeRatio = squareImages[i-1].size[0] / squareImages[0].size[0]
+        sizeRatio = squareImages[i - 1].size[0] / squareImages[0].size[0]
 
-        curr_image = squareImages[i-1]
+        curr_image = squareImages[i - 1]
         curr_image.draw()
         win.flip()
-        print("color " + str(color) + 'i: '+str(i-1))
+        print("color " + str(color) + 'i: ' + str(i - 1))
         # send event to biopac
         report_event(color_to_T_dict[color], color_to_T_dict[color] + '_square' + str(i))
 
@@ -526,11 +573,12 @@ def GrowingSquare(color, block, trial, params):
         if params['continuousShape'] or i == 5:
             core.wait(square_duration)
         else:
-            core.wait(1)
+            square_present = random.uniform(2, 2.5)
+            core.wait(square_present)
             curr_image.image = "squares/blank.jpg"
             curr_image.draw()
             win.flip()
-            core.wait(square_duration - 1)
+            core.wait(square_duration - square_present)
 
         # get new keys
         newKeys = event.getKeys(keyList=['q', 'escape'], timeStamped=globalClock)
@@ -649,26 +697,27 @@ def SetPort(color, size, block, csv_writer):
             logging.log(level=logging.EXP, msg='set medoc %s' % (code.iat[0, 1]))
 
 
+
 # Handle end of a session
 
 
 def RunVas(questions, options, io, pos=(0., -0.25), scaleTextPos=[0., 0.25], questionDur=params['questionDur'],
            isEndedByKeypress=params['questionSelectAdvances'], name='Vas'):
-
     # wait until it's time
     WaitForFlipTime()
 
     # Show questions and options
     rating, decisionTime, choiceHistory, score = RatingScales.ShowVAS(questions, options, win, questionDur=questionDur, \
-                                                                 upKey=params['questionUpKey'],
-                                                                 downKey=params['questionDownKey'],
-                                                                 selectKey=params['questionSelectKey'],
-                                                                 isEndedByKeypress=isEndedByKeypress,
-                                                                 textColor=params['vasTextColor'], name=name, pos=pos,
-                                                                 scaleTextPos=scaleTextPos,
-                                                                 labelYPos=pos[1] - params['vasLabelYDist'],
-                                                                 markerSize=params['vasMarkerSize'],
-                                                                 tickHeight=1, tickLabelWidth=0.9, io=io)
+                                                                      upKey=params['questionUpKey'],
+                                                                      downKey=params['questionDownKey'],
+                                                                      selectKey=params['questionSelectKey'],
+                                                                      isEndedByKeypress=isEndedByKeypress,
+                                                                      textColor=params['vasTextColor'], name=name,
+                                                                      pos=pos,
+                                                                      scaleTextPos=scaleTextPos,
+                                                                      labelYPos=pos[1] - params['vasLabelYDist'],
+                                                                      markerSize=params['vasMarkerSize'],
+                                                                      tickHeight=1, tickLabelWidth=0.9, io=io)
 
     # write data to CSV file
     csv_writer.writerow([globalClock.getTime(), 'VASRatingScale ' + name + ': (key response) rating=' + str(rating),
@@ -691,11 +740,15 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
     # display pre-VAS prompt
     if not params['skipPrompts']:
         if expInfo['gender'] == 'female':
-            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחצי על כל מקש כדי להמשיך")] if params['language'] == 'Hebrew' else ["Press any key to continue"], win, message1,
-                                    message2)
+            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחצי על כל מקש כדי להמשיך")] if params[
+                                                                                                                    'language'] == 'Hebrew' else [
+                "Press any key to continue"], win, message1,
+                                        message2)
         else:
-            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחץ על כל מקש כדי להמשיך")] if params['language'] == 'Hebrew' else ["Press any key to continue"], win, message1,
-                                    message2)
+            BasicPromptTools.RunPrompts([params['PreVasMsg']], [reverse_string("לחץ על כל מקש כדי להמשיך")] if params[
+                                                                                                                   'language'] == 'Hebrew' else [
+                "Press any key to continue"], win, message1,
+                                        message2)
 
     # Display this VAS
     for i in range(len(questions)):
@@ -705,10 +758,11 @@ def RunMoodVas(questions, options, io, name='MoodVas'):
         imgName = imgName.replace('?', '')
         imgName = imgName.replace('\n', '')
         if name == 'PainRatingScale':
-            score = RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name, io=io)
+            score = RunVas(question, option, questionDur=params['painRateDuration'], isEndedByKeypress=False, name=name,
+                           io=io)
         else:
             score = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name, io=io)
-        
+
         # VAS_history = RunVas(question, option, questionDur=float("inf"), isEndedByKeypress=True, name=name)
         # csv_writer.writerow([globalClock.getTime(), 'VASRatingScale ' + name + ': choiceHistory=' + str(VAS_history)])
 
@@ -774,10 +828,10 @@ def BetweenBlock(params):
     # COMMENTED OUT NEED TO PRESS SPACE BEFORE PROCEEDING TO NEXT SLIDE
     if params['language'] == 'Hebrew':
         message1.setText(reverse_string("הסתיים הבלוק הנוכחי"))
-        message2.setText(reverse_string("לחץ על מקש הרווח כדי להתקדם"))
+        message2.setText(reverse_string("אנא המתן להוראות הנסיין"))
     else:
         message1.setText("The current block has ended")
-        message2.setText("Press the spacebar to proceed")
+        message2.setText("Please wait for the Experimenter's Instructions")
     win.logOnFlip(level=logging.EXP, msg='BetweenBlock')
     #
     message1.setFont('Arial Hebrew')
@@ -788,7 +842,7 @@ def BetweenBlock(params):
     #
     thisKey = event.waitKeys(keyList=['space'])  # use space bar to avoid accidental advancing
     if thisKey:
-       tNextFlip[0] = globalClock.getTime() + 2.0
+        tNextFlip[0] = globalClock.getTime() + 2.0
 
 
 def BehavFile(absTime, block, trial, color, trialTime, phase, phaseTime):
@@ -822,7 +876,9 @@ for block in range(0, params['nBlocks']):
         while again:
             again = False
             if params['skipInstructions'] == False:
-                image = visual.ImageStim(win, image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg", pos=(0, 0), units='pix', size=screenRes)
+                image = visual.ImageStim(win,
+                                         image=f"{params['instructionsFolder']}{params['instructionsSuffix']}_1.jpeg",
+                                         pos=(0, 0), units='pix', size=screenRes)
                 image.draw()
                 win.flip()
                 HelperFunctions.wait_for_space(win, io)
@@ -870,12 +926,13 @@ for block in range(0, params['nBlocks']):
         # if thisKey:
         #     tNextFlip[0] = globalClock.getTime() + random.randint(4, 6)
 
+    # Omer - Remove excess cross
     # wait before first stimulus
-    fixationCross.draw()
-    win.logOnFlip(level=logging.EXP, msg='Display Fixation')
-    win.flip()  # Flip the window to display the fixation cross
-    core.wait(1)  # Change to that: random.randint(4, 6)
-    report_event('Fixation', 'Fixation_cross')
+    # fixationCross.draw()
+    # win.logOnFlip(level=logging.EXP, msg='Display Fixation')
+    # win.flip()  # Flip the window to display the fixation cross
+    # core.wait(1)  # Change to that: random.randint(4, 6)
+    # report_event('Fixation', 'Fixation_cross')
 
     # wait until it's time to show screen
     WaitForFlipTime()
@@ -906,17 +963,19 @@ for block in range(0, params['nBlocks']):
             write_to_csv(['block:' + str(block), 'trial:' + str(trial), 'color:' + str(color)], csv_file)
 
         # Calls the GrowingSquare function to present the stimulus, and records the start time and phase start time.
+        iti_before_squares(color_to_T_dict[color])
         trialStart, phaseStart = GrowingSquare(color, block, trial, params)
         win.flip()  # Flips the screen and waits for 2 seconds.
-        core.wait(1)
+        core.wait(3)
 
         # Sets the next stimulus presentation time.
         tNextFlip[0] = globalClock.getTime() + (painISI[painITI])
         painITI += 1
+        report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
         rating = RatingScales.run_vas(win, io, params, "PainRating", params['questionDur'])
         # rating = RunMoodVas(questions_RatingPain, options_RatingPain, name='PainRatingScale', io=io)
-        report_event(color_to_T_dict[color], color_to_T_dict[color] + '_PainRatingScale')
-        WaitForFlipTime()
+        # WaitForFlipTime()
+        iti_after_squares(color_to_T_dict[color])
         tNextFlip[0] = globalClock.getTime() + random.randint(8, 12)
 
         # Save new data to the DF:
@@ -928,7 +987,8 @@ for block in range(0, params['nBlocks']):
 
         if not os.path.exists("./data"):
             os.mkdir("data")
-        pain_rating_df.to_csv(f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings - {strftime('%Y-%m-%d %H-%M', localtime(params['startTime']))}.csv")
+        pain_rating_df.to_csv(
+            f"./data/TIM {expInfo['subject']} Session {expInfo['session']} Pain Ratings - {strftime('%Y-%m-%d %H-%M', localtime(params['startTime']))}.csv")
 
     ### THE FIXATION "SAFE" AND "GET READY" WAS DELETED FROM HERE ###
 
