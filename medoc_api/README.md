@@ -101,3 +101,11 @@ Please check which example is ran in the bottom lines of the program.
 
 
 
+#Updates 09.04.2024
+
+- Added infinite time allowed between 16degC and 40degC (in libPythonAPI.dll).
+- Added current thermode command. This enables utilizing both thermodes independently by using the enable_thermode command for the thermodes participating in a test, then use set_active_thermode and set_current_thermode commands before a temperature command. 
+	- self.device.set_current_thermode(enums.DEVICE_TAG.Slave) #for secondary thermode
+	- self.device.set_current_thermode(enums.DEVICE_TAG.Master) #for main thermode
+- Added a loop at the end of the Main class as a temporary workaround to keep the serial connection open. This may be modified to include a condition to exit the loop.
+- Added self test message boxes to ensure awareness that the thermode should be removed from skin prior to a self test.
