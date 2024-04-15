@@ -40,7 +40,7 @@ class TsaDevice:
     events from a patient response device.
     """
 
-    def __init__(self, auto_connect_port=True, preferences_path="preferences.json") -> None:
+    def __init__(self, auto_connect_port=True, preferences_path="./medoc_api/preferences.json") -> None:
         self.current_thermode: enums.DEVICE_TAG = enums.DEVICE_TAG.Master
         self.token_holder: TokenHolder = TokenHolder()
 
@@ -202,7 +202,7 @@ class TsaDevice:
             "commandId": 37
         }
 
-        com = getVersion_command(self.current_thermode)
+        com = getVersion_command()
         res = self.send_command(com, data)
         return self.validate_response(res)
 
@@ -212,7 +212,7 @@ class TsaDevice:
             "commandId": 33
         }
 
-        com = get_status_TCU_command(self.current_thermode)
+        com = get_status_TCU_command()
         res = self.send_command(com, data)
         return self.validate_response(res)
 
@@ -224,7 +224,7 @@ class TsaDevice:
             "m_isEnabled": True
         }
 
-        com = enable_termode_command(self.current_thermode)
+        com = enable_termode_command()
         res = self.send_command(com, data)
         return self.validate_response(res)
 
@@ -236,7 +236,7 @@ class TsaDevice:
             "m_isEnabled": False
         }
 
-        com = enable_termode_command(self.current_thermode)
+        com = enable_termode_command()
         res = self.send_command(com, data)
         return self.validate_response(res)
 
@@ -252,7 +252,7 @@ class TsaDevice:
             raise ValueError("wait_for_state must be used with status thread running")
 
         start_time = time.time()
-        com = set_TCU_state_command(self.current_thermode)
+        com = set_TCU_state_command()
         res = self.send_command(com, data)
         valid = self.validate_response(res)
 
@@ -273,7 +273,7 @@ class TsaDevice:
             "m_thermodeId": thermode_id
         }
 
-        com = get_active_thermode_command(self.current_thermode)
+        com = get_active_thermode_command()
         res = self.send_command(com, data)
         return self.validate_response(res)
 
@@ -286,7 +286,7 @@ class TsaDevice:
             "m_thermodeId": thermode_id
         }
 
-        com = set_active_thermode_command(self.current_thermode)
+        com = set_active_thermode_command()
         res = self.send_command(com, data)
         return self.validate_response(res)
 
@@ -297,7 +297,7 @@ class TsaDevice:
             "commandId": 27
         }
 
-        com = clear_command_buffer_command(self.current_thermode)
+        com = clear_command_buffer_command()
         res = self.send_command(com, data)
         return self.validate_response(res)
 
@@ -308,7 +308,7 @@ class TsaDevice:
             "m_isResetClock": is_reset_clock
         }
         
-        com = run_test_command(self.current_thermode)
+        com = run_test_command()
         res = self.send_command(com, data)
         return self.validate_response(res)
 
@@ -343,7 +343,7 @@ class TsaDevice:
             'm_time': time
         }
 
-        com = finite_ramp_by_temperature_command(self.current_thermode)
+        com = finite_ramp_by_temperature_command()
         com.m_lowMargin = low_margain
         com.m_highMargin = high_margain
         res = self.send_command(com, data=data)
@@ -355,7 +355,7 @@ class TsaDevice:
             "commandId": 47
         }
         
-        com = stop_test_command(self.current_thermode)
+        com = stop_test_command()
         res = self.send_command(com, data=data)
         return self.validate_response(res)
 
@@ -397,7 +397,7 @@ class TsaDevice:
 				"m_time": time
         }
 
-        com = finite_ramp_by_time_command(self.current_thermode)
+        com = finite_ramp_by_time_command()
         res = self.send_command(com, data=data)
         return self.validate_response(res)
 
@@ -407,7 +407,7 @@ class TsaDevice:
             "commandId": 25
         }
 
-        com = end_test_command(self.current_thermode)
+        com = end_test_command()
         res = self.send_command(com, data=data)
         return self.validate_response(res)
 
@@ -419,7 +419,7 @@ class TsaDevice:
             "m_isNoPressed": is_no_pressed
         }
 
-        com = simulate_unit_response_command(self.current_thermode)
+        com = simulate_unit_response_command()
         res = self.send_command(com, data=data)
         return self.validate_response(res)
 
