@@ -662,12 +662,12 @@ def GrowingSquare(color, block, trial, params):
             print(f"Temp After Heat Command = {device.status_temp}")
 
             print("lowering to baseline")
-            device.finite_ramp_by_temperature(32, 0.1, 0.1, is_stop_on_response_unit_yes=False, time=1000)
+            device.finite_ramp_by_temperature(32, 0.1, 0.1, is_stop_on_response_unit_yes=False, time=1500)
             print(f"State before Return to Baseline = {device.status_state}")
             print(f"Temp before Return to Baseline = {device.status_temp}")
             device.run_test()
             temp_start_time = time.time()
-            while time.time() < temp_start_time + 1.1:
+            while time.time() < temp_start_time + 1.5:
                 for curr_event in event.getKeys():
                     if curr_event == 'escape':
                         device.stop_test()
@@ -675,6 +675,10 @@ def GrowingSquare(color, block, trial, params):
                 core.wait(0.05)
             print(f"State after Return to Baseline = {device.status_state}")
             print(f"Temp after Return to Baseline = {device.status_temp}")
+            lowering_test_start = time.time()
+            while device.status_temp > 32.5 and time.time() <= lowering_test_start + 4:
+                print(f"Current Temperature: {device.status_temp}")
+                core.wait(0.5)
             device.stop_test()
 
         # Flush the key buffer and mouse movements
